@@ -7,60 +7,61 @@ using namespace std;
 
 
 
-void sort_input(pfbaxisin_t input[N_CHAN_PLANE*2],
+void sort_input(pfbaxisin_t &input,
 				hls::stream<iqstruct_t> &A, hls::stream<iqstruct_t> &B, hls::stream<iqstruct_t> &C) {
-	for (int cycle=0; cycle<N_CHAN_PLANE*2;cycle++) {
-#pragma HLS pipeline rewind
-		iq_t iq=input[cycle].data;
-		iqstruct_t in;
-		in.i=iq.real();
-		in.q=iq.imag();
-		bool odd_cycle = ap_uint<1>(cycle);
-		if (odd_cycle) {
-			if (cycle < N_CHAN_PLANE) {
-				B.write(in);
-			} else {
-				C.write(in);
-			}
+#pragma HLS pipeline ii=1
+	static ap_uint<9> cycle=0;
+	iq_t iq=input.data;
+	iqstruct_t in;
+	in.i=iq.real();
+	in.q=iq.imag();
+
+	bool odd_cycle = cycle[0];
+	if (odd_cycle) {
+		if (cycle < N_CHAN_PLANE) {
+			B.write(in);
 		} else {
-			A.write(in);
+			C.write(in);
 		}
+	} else {
+		A.write(in);
 	}
+	cycle++;
 }
 
 void play_output(hls::stream<iqstruct_t> &A, hls::stream<iqstruct_t> &B, hls::stream<iqstruct_t> &C,
-				 pfbaxisin_t output[N_CHAN_PLANE*2]) {
+				 pfbaxisin_t &output) {
+#pragma HLS pipeline ii=1
 	iqstruct_t temp;
-	for (int cycle=0; cycle<2*N_CHAN_PLANE; cycle++) {
-#pragma HLS pipeline rewind enable_flush
+	static ap_uint<9> cycle=0;
 
+	#ifndef __SYNTHESIS__
+	cout<<"Cycle "<<cycle<<": Read ";
+	#endif
+	if (cycle < N_CHAN_PLANE) {
+		A.read(temp);
 		#ifndef __SYNTHESIS__
-		cout<<"Cycle "<<cycle<<": Read ";
+		cout<<temp.i<<" from A";
 		#endif
-		if (cycle < N_CHAN_PLANE) {
-			A.read(temp);
-			#ifndef __SYNTHESIS__
-			cout<<temp.i<<" from A";
-			#endif
-		} else if (cycle-N_CHAN_PLANE >= N_CHAN_PLANE/2) {
-			B.read(temp);
-			#ifndef __SYNTHESIS__
-			cout<<temp.i<<" from B";
-			#endif
-		} else {
-			C.read(temp);
-			#ifndef __SYNTHESIS__
-			cout<<temp.i<<" from C";
-			#endif
-		}
+	} else if (cycle-N_CHAN_PLANE >= N_CHAN_PLANE/2) {
+		B.read(temp);
 		#ifndef __SYNTHESIS__
-		cout<<" Sizes: "<<A.size()<<", "<<B.size()<<", "<<C.size()<<"\n";
+		cout<<temp.i<<" from B";
 		#endif
-		output[cycle].data=iq_t(temp.i, temp.q);
+	} else {
+		C.read(temp);
+		#ifndef __SYNTHESIS__
+		cout<<temp.i<<" from C";
+		#endif
 	}
+	#ifndef __SYNTHESIS__
+	cout<<" Sizes: "<<A.size()<<", "<<B.size()<<", "<<C.size()<<"\n";
+	#endif
+	output.data=iq_t(temp.i, temp.q);
+	cycle++;
 }
 
-void top(pfbaxisin_t input[N_CHAN_PLANE*2], pfbaxisin_t output[N_CHAN_PLANE*2]) {
+void top(pfbaxisin_t &input, pfbaxisin_t &output) {
 //This takes a single PFB lane stream, consisting of 2 sets (one is delayed) of 256 TDM channels,
 // and reorders them, correctly applying the required circular shift.
 // e.g. 1 1z 2 2z 3 3z ... 256 256z becomes 1...256 129z...256z 1z...128z.
