@@ -24,7 +24,7 @@ int main(){
 
 	//Run the stream input
 	for (int i=0; i<N_CYCLES;i++) { // Go through more than once to see the phase increment
-		top(lanein+i*N_CHAN_PLANE*2, laneout+i*N_CHAN_PLANE*2);
+		fir_to_fft(lanein+i*N_CHAN_PLANE*2, laneout+i*N_CHAN_PLANE*2);
 	}
 
 	//Compare the result

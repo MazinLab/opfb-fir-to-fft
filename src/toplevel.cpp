@@ -60,7 +60,7 @@ void play_output(hls::stream<iqstruct_t> &A, hls::stream<iqstruct_t> &B, hls::st
 	}
 }
 
-void top(pfbaxisin_t input[N_CHAN_PLANE*2], pfbaxisin_t output[N_CHAN_PLANE*2]) {
+void fir_to_fft(pfbaxisin_t input[N_CHAN_PLANE*2], pfbaxisin_t output[N_CHAN_PLANE*2]) {
 //This takes a single PFB lane stream, consisting of 2 sets (one is delayed) of 256 TDM channels,
 // and reorders them, correctly applying the required circular shift.
 // e.g. 1 1z 2 2z 3 3z ... 256 256z becomes 1...256 129z...256z 1z...128z.
@@ -71,9 +71,9 @@ void top(pfbaxisin_t input[N_CHAN_PLANE*2], pfbaxisin_t output[N_CHAN_PLANE*2]) 
 #pragma HLS DATAFLOW
 #pragma HLS DATA_PACK variable=input
 #pragma HLS DATA_PACK variable=output
-#pragma HLS INTERFACE axis port=input depth=2048 register=reverse
-#pragma HLS INTERFACE axis port=output depth=2048 register=forward
-#pragma HLS INTERFACE s_axilite depth=2048 port=return
+#pragma HLS INTERFACE axis port=input depth=512 register=reverse
+#pragma HLS INTERFACE axis port=output depth=512 register=forward
+#pragma HLS INTERFACE ap_ctrl_none port=return
 
 	hls::stream<iqstruct_t> A("A"), B("B"), C("C");
 #pragma HLS STREAM depth=256 variable=A
