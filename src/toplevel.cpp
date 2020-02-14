@@ -150,6 +150,7 @@ void play_output_lanes(hls::stream<iqstruct_t> A[N_LANES], hls::stream<iqstruct_
 			cout<<" Sizes: "<<A[lane].size()<<", "<<B[lane].size()<<", "<<C[lane].size()<<"\n";
 			#endif
 			output[lane][cycle].data=iq_t(temp.i, temp.q);
+			output[lane][cycle].last=cycle==255 || cycle==511;
 		}
 	}
 }

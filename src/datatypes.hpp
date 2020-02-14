@@ -24,6 +24,7 @@ typedef struct {
 
 typedef struct {
 	iq_t data;
+	ap_uint<1> last;
 } pfbaxisin_t;
 
 //typedef struct {

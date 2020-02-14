@@ -50,10 +50,15 @@ int main(){
 				cout<<" In: "<<setw(13)<<lanein[i][lane][j].data;
 				cout<<" Out: "<<setw(13)<<laneout[i][lane][j].data;
 				cout<<" Expected: "<<setw(13)<<lanein[i][lane][inputchan].data;
+				cout<<" Last: " << laneout[i][lane][j].last;
 				cout<<"\n";
 			}
 			if (expected!=lanev) {
 				cout<<"FAIL CHECK\n";
+				fail|=true;
+			}
+			if (!(laneout[i][lane][j].last == (j==255 || j==511))) {
+				cout<<"FAIL LAST CHECK\n";
 				fail|=true;
 			}
 
