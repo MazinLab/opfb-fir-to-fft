@@ -1,5 +1,5 @@
 open_project opfb-fir-to-fft
-set_top fir_to_fft
+set_top fir_to_fftx16
 add_files src/datatypes.hpp
 add_files src/toplevel.cpp
 add_files src/toplevel.hpp
