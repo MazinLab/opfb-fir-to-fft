@@ -17,8 +17,8 @@ int main(){
 	for (int i=0; i<N_CYCLES; i++){
 		for (int j=0; j<N_CHAN_PLANE*2; j+=2){
 			for (int k=0; k<N_LANES;k++){
-				lanein[i][k][j].data=iq_t(i*N_CHAN_PLANE*2+j, i*N_CHAN_PLANE*2+j);
-				lanein[i][k][j+1].data=iq_t(i*N_CHAN_PLANE*2+j-N_CHAN_PLANE/2, i*N_CHAN_PLANE*2+j+1);
+				lanein[i][k][j].data=(i*N_CHAN_PLANE*2+j) | ((i*N_CHAN_PLANE*2+j)<<16);
+				lanein[i][k][j+1].data=(i*N_CHAN_PLANE*2+j-N_CHAN_PLANE/2) | ((i*N_CHAN_PLANE*2+j+1)<<16);
 			}
 		}
 	}
@@ -42,14 +42,14 @@ int main(){
 			} else { //j >384
 				inputchan=j*2+1-3*N_CHAN_PLANE;
 			}
-			int lanev=laneout[i][lane][j].data.real();
-			int expected=lanein[i][lane][inputchan].data.real();
+			int lanev=laneout[i][lane][j].data.to_uint()&0xffff;
+			int expected=lanein[i][lane][inputchan].data.to_uint()&0xffff;
 			if (PRINT) {
 				cout<<"Clock Cycle: "<<i*N_CHAN_PLANE*2+j;
 				cout<<" PNdx: "<<inputchan;
-				cout<<" In: "<<setw(13)<<lanein[i][lane][j].data;
-				cout<<" Out: "<<setw(13)<<laneout[i][lane][j].data;
-				cout<<" Expected: "<<setw(13)<<lanein[i][lane][inputchan].data;
+				cout<<" In: "<<setw(13)<<"("<<(lanein[i][lane][j].data.to_uint()&0xffff) <<","<<(lanein[i][lane][j].data.to_uint()>>16)<<")";
+				cout<<" Out: "<<setw(13)<<"("<<(laneout[i][lane][j].data.to_uint()&0xffff) <<","<<(laneout[i][lane][j].data.to_uint()>>16)<<")";
+				cout<<" Expected: "<<setw(13)<<"("<<(lanein[i][lane][inputchan].data.to_uint()&0xffff)<<","<<(lanein[i][lane][inputchan].data.to_uint()>>16)<<")";
 				cout<<" Last: " << laneout[i][lane][j].last;
 				cout<<"\n";
 			}
