@@ -34,7 +34,7 @@ void sort_input_lanes(pfbaxisin_t input[N_LANES][N_CHAN_PLANE*2],
 
 void play_output_lanes(hls::stream<iqstruct_t> A[N_LANES], hls::stream<iqstruct_t> B[N_LANES], hls::stream<iqstruct_t> C[N_LANES],
 				 pfbaxisin_t output[N_LANES][N_CHAN_PLANE*2]) {
-#pragma HLS INTERFACE ap_ctrl_none port=return
+//#pragma HLS INTERFACE ap_ctrl_none port=return
 	iqstruct_t temp;
 	play_chan: for (int cycle=0; cycle<2*N_CHAN_PLANE; cycle++) {
 #pragma HLS pipeline rewind
@@ -46,23 +46,23 @@ void play_output_lanes(hls::stream<iqstruct_t> A[N_LANES], hls::stream<iqstruct_
 			if (cycle < N_CHAN_PLANE) {
 				A[lane].read(temp);
 				#ifndef __SYNTHESIS__
-				cout<<temp<<" from A";
+				cout<<(temp.to_uint()&0xffff)<<" from A";
 				#endif
 			} else if (cycle-N_CHAN_PLANE >= N_CHAN_PLANE/2) {
 				B[lane].read(temp);
 				#ifndef __SYNTHESIS__
-				cout<<temp<<" from B";
+				cout<<(temp.to_uint()&0xffff)<<" from B";
 				#endif
 			} else {
 				C[lane].read(temp);
 				#ifndef __SYNTHESIS__
-				cout<<temp<<" from C";
+				cout<<(temp.to_uint()&0xffff)<<" from C";
 				#endif
 			}
 			#ifndef __SYNTHESIS__
 			cout<<" Sizes: "<<A[lane].size()<<", "<<B[lane].size()<<", "<<C[lane].size()<<"\n";
 			#endif
-			output[lane][cycle].data=temp;
+			output[lane][cycle].data=iq_t(temp); //do we need the iq_t()?
 			output[lane][cycle].last=cycle==255 || cycle==511;
 		}
 	}

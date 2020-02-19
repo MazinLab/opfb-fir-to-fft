@@ -42,13 +42,13 @@ int main(){
 			} else { //j >384
 				inputchan=j*2+1-3*N_CHAN_PLANE;
 			}
-			int lanev=laneout[i][lane][j].data.to_uint()&0xffff;
-			int expected=lanein[i][lane][inputchan].data.to_uint()&0xffff;
+			int lanev=laneout[i][lane][j].data.to_uint()&0xffffffff;
+			int expected=lanein[i][lane][inputchan].data.to_uint()&0xffffffff;
 			if (PRINT) {
 				cout<<"Clock Cycle: "<<i*N_CHAN_PLANE*2+j;
 				cout<<" PNdx: "<<inputchan;
 				cout<<" In: "<<setw(13)<<"("<<(lanein[i][lane][j].data.to_uint()&0xffff) <<","<<(lanein[i][lane][j].data.to_uint()>>16)<<")";
-				cout<<" Out: "<<setw(13)<<"("<<(laneout[i][lane][j].data.to_uint()&0xffff) <<","<<(laneout[i][lane][j].data.to_uint()>>16)<<")";
+				cout<<" Out: "<<setw(13)<<"("<<(laneout[i][lane][j].data.to_uint()&0xffff)<<","<<(laneout[i][lane][j].data.to_uint()>>16)<<")";
 				cout<<" Expected: "<<setw(13)<<"("<<(lanein[i][lane][inputchan].data.to_uint()&0xffff)<<","<<(lanein[i][lane][inputchan].data.to_uint()>>16)<<")";
 				cout<<" Last: " << laneout[i][lane][j].last;
 				cout<<"\n";
