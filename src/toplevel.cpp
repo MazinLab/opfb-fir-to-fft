@@ -6,36 +6,38 @@ using namespace std;
 
 
 void sort_input_lanes(pfbaxisin_t input[N_LANES][N_CHAN_PLANE*2],
-				hls::stream<iqstruct_t> A[N_LANES], hls::stream<iqstruct_t> B[N_LANES], hls::stream<iqstruct_t> C[N_LANES]) {
+				hls::stream<iq_t> A[N_LANES], hls::stream<iq_t> B[N_LANES], hls::stream<iq_t> C[N_LANES]) {
+
+	bool mismatch[N_LANES];
+#pragma HLS ARRAY_PARTITION variable=mismatch complete
 	sort_chan: for (ap_uint<10> cycle=0; cycle<N_CHAN_PLANE*2;cycle++) {
 #pragma HLS INTERFACE ap_ctrl_none port=return
-#pragma HLS pipeline rewind
+#pragma HLS PIPELINE REWIND
 		for (unsigned short lane=0; lane<N_LANES; lane++) {
 #pragma HLS UNROLL
-			iq_t iq=input[lane][cycle].data;
-			iqstruct_t in;
-//			in.i=iq.real();
-//			in.q=iq.imag();
+			pfbaxisin_t in=input[lane][cycle];
+			iq_t iq=in.data;
+			mismatch[lane]|=(in.last && !(cycle==255||cycle==511));
 			//In the agregate design this nested if places a high-fanout WE to the memories that back these FIFOs
 			// an alternate approach would be to write to the mem every time and only alter the address
 			//bool odd_cycle = ap_uint<1>(cycle);
 			if (cycle[0]) {
 				if (cycle < N_CHAN_PLANE) {
-					B[lane].write(in);
+					B[lane].write(iq);
 				} else {
-					C[lane].write(in);
+					C[lane].write(iq);
 				}
 			} else {
-				A[lane].write(in);
+				A[lane].write(iq);
 			}
 		}
 	}
 }
 
-void play_output_lanes(hls::stream<iqstruct_t> A[N_LANES], hls::stream<iqstruct_t> B[N_LANES], hls::stream<iqstruct_t> C[N_LANES],
+void play_output_lanes(hls::stream<iq_t> A[N_LANES], hls::stream<iq_t> B[N_LANES], hls::stream<iq_t> C[N_LANES],
 				 pfbaxisin_t output[N_LANES][N_CHAN_PLANE*2]) {
 //#pragma HLS INTERFACE ap_ctrl_none port=return
-	iqstruct_t temp;
+	iq_t temp;
 	play_chan: for (int cycle=0; cycle<2*N_CHAN_PLANE; cycle++) {
 #pragma HLS pipeline rewind
 		for (unsigned short lane=0; lane<N_LANES; lane++) {
@@ -46,23 +48,23 @@ void play_output_lanes(hls::stream<iqstruct_t> A[N_LANES], hls::stream<iqstruct_
 			if (cycle < N_CHAN_PLANE) {
 				A[lane].read(temp);
 				#ifndef __SYNTHESIS__
-				cout<<(temp.to_uint()&0xffff)<<" from A";
+				cout<<(temp.to_uint()&0x0000ffff)<<" from A";
 				#endif
 			} else if (cycle-N_CHAN_PLANE >= N_CHAN_PLANE/2) {
 				B[lane].read(temp);
 				#ifndef __SYNTHESIS__
-				cout<<(temp.to_uint()&0xffff)<<" from B";
+				cout<<(temp.to_uint()&0x0000ffff)<<" from B";
 				#endif
 			} else {
 				C[lane].read(temp);
 				#ifndef __SYNTHESIS__
-				cout<<(temp.to_uint()&0xffff)<<" from C";
+				cout<<(temp.to_uint()&0x0000ffff)<<" from C";
 				#endif
 			}
 			#ifndef __SYNTHESIS__
 			cout<<" Sizes: "<<A[lane].size()<<", "<<B[lane].size()<<", "<<C[lane].size()<<"\n";
 			#endif
-			output[lane][cycle].data=iq_t(temp); //do we need the iq_t()?
+			output[lane][cycle].data=temp; //do we need the iq_t()?
 			output[lane][cycle].last=cycle==255 || cycle==511;
 		}
 	}
@@ -80,23 +82,18 @@ void fir_to_fftx16(pfbaxisin_t input[N_LANES][N_CHAN_PLANE*2], pfbaxisin_t outpu
 #pragma HLS DATAFLOW
 #pragma HLS ARRAY_PARTITION variable=input dim=1
 #pragma HLS ARRAY_PARTITION variable=output dim=1
-#pragma HLS DATA_PACK variable=input
-#pragma HLS DATA_PACK variable=output
 #pragma HLS INTERFACE axis port=input depth=512 register=reverse
 #pragma HLS INTERFACE axis port=output depth=512 register=forward
 #pragma HLS INTERFACE ap_ctrl_none port=return
 
 
-	hls::stream<iqstruct_t> A[N_LANES], B[N_LANES], C[N_LANES];
+	hls::stream<iq_t> A[N_LANES], B[N_LANES], C[N_LANES];
 #pragma HLS STREAM depth=256 variable=A
 #pragma HLS STREAM depth=256 variable=B
 #pragma HLS STREAM depth=128 variable=C
 #pragma HLS RESOURCE variable=A core=FIFO_LUTRAM
 #pragma HLS RESOURCE variable=B core=FIFO_LUTRAM
 #pragma HLS RESOURCE variable=C core=FIFO_LUTRAM //FIFO_LUTRAM FIFO_BRAM FIFO_SRL
-//#pragma HLS DATA_PACK variable=A
-//#pragma HLS DATA_PACK variable=B
-//#pragma HLS DATA_PACK variable=C
 	sort_input_lanes(input, A, B, C);
 	play_output_lanes(A,B,C, output);
 

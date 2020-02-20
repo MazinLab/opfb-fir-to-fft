@@ -14,11 +14,12 @@ int main(){
 	bool fail=false;
 
 	//Generate data
-	for (int i=0; i<N_CYCLES; i++){
-		for (int j=0; j<N_CHAN_PLANE*2; j+=2){
-			for (int k=0; k<N_LANES;k++){
+	for (unsigned int i=0; i<N_CYCLES; i++){
+		for (unsigned int j=0; j<N_CHAN_PLANE*2; j+=2){
+			for (unsigned int k=0; k<N_LANES;k++){
 				lanein[i][k][j].data=(i*N_CHAN_PLANE*2+j) | ((i*N_CHAN_PLANE*2+j)<<16);
 				lanein[i][k][j+1].data=(i*N_CHAN_PLANE*2+j-N_CHAN_PLANE/2) | ((i*N_CHAN_PLANE*2+j+1)<<16);
+				lanein[i][k][j+1].last=j==255||j==511;
 			}
 		}
 	}
@@ -42,8 +43,8 @@ int main(){
 			} else { //j >384
 				inputchan=j*2+1-3*N_CHAN_PLANE;
 			}
-			int lanev=laneout[i][lane][j].data.to_uint()&0xffffffff;
-			int expected=lanein[i][lane][inputchan].data.to_uint()&0xffffffff;
+			unsigned int lanev=laneout[i][lane][j].data.to_uint()&0x0000ffff;
+			unsigned int expected=lanein[i][lane][inputchan].data.to_uint()&0x0000ffff;
 			if (PRINT) {
 				cout<<"Clock Cycle: "<<i*N_CHAN_PLANE*2+j;
 				cout<<" PNdx: "<<inputchan;

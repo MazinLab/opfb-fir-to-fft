@@ -8,13 +8,9 @@
 
 typedef ap_uint<32> iq_t;
 
-
-typedef ap_uint<32> iqstruct_t;
-
 typedef struct {
   iq_t data;
   ap_uint<1> last;
 } pfbaxisin_t;
-
 
 #endif
