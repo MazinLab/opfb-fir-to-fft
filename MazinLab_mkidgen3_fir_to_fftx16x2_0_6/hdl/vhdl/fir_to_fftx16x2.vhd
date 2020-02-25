@@ -81,21 +81,17 @@ port (
     input_14_TREADY : OUT STD_LOGIC;
     input_15_TVALID : IN STD_LOGIC;
     input_15_TREADY : OUT STD_LOGIC;
-    ap_start : IN STD_LOGIC;
     i_output_TVALID : OUT STD_LOGIC;
     i_output_TREADY : IN STD_LOGIC;
     q_output_TVALID : OUT STD_LOGIC;
-    q_output_TREADY : IN STD_LOGIC;
-    ap_done : OUT STD_LOGIC;
-    ap_ready : OUT STD_LOGIC;
-    ap_idle : OUT STD_LOGIC );
+    q_output_TREADY : IN STD_LOGIC );
 end;
 
 
 architecture behav of fir_to_fftx16x2 is 
     attribute CORE_GENERATION_INFO : STRING;
     attribute CORE_GENERATION_INFO of behav : architecture is
-    "fir_to_fftx16x2,hls_ip_2019_2_1,{HLS_INPUT_TYPE=cxx,HLS_INPUT_FLOAT=0,HLS_INPUT_FIXED=0,HLS_INPUT_PART=xczu28dr-ffvg1517-2-e,HLS_INPUT_CLOCK=1.818000,HLS_INPUT_ARCH=dataflow,HLS_SYN_CLOCK=1.351750,HLS_SYN_LAT=514,HLS_SYN_TPT=512,HLS_SYN_MEM=96,HLS_SYN_DSP=0,HLS_SYN_FF=3248,HLS_SYN_LUT=4047,HLS_VERSION=2019_2_1}";
+    "fir_to_fftx16x2,hls_ip_2019_2_1,{HLS_INPUT_TYPE=cxx,HLS_INPUT_FLOAT=0,HLS_INPUT_FIXED=0,HLS_INPUT_PART=xczu28dr-ffvg1517-2-e,HLS_INPUT_CLOCK=1.818000,HLS_INPUT_ARCH=dataflow,HLS_SYN_CLOCK=1.351750,HLS_SYN_LAT=514,HLS_SYN_TPT=512,HLS_SYN_MEM=96,HLS_SYN_DSP=0,HLS_SYN_FF=3248,HLS_SYN_LUT=4045,HLS_VERSION=2019_2_1}";
     constant ap_const_lv256_lc_1 : STD_LOGIC_VECTOR (255 downto 0) := "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
     constant ap_const_lv1_0 : STD_LOGIC_VECTOR (0 downto 0) := "0";
     constant ap_const_logic_1 : STD_LOGIC := '1';
@@ -425,8 +421,6 @@ architecture behav of fir_to_fftx16x2 is
     signal C_15_full_n : STD_LOGIC;
     signal C_15_dout : STD_LOGIC_VECTOR (31 downto 0);
     signal C_15_empty_n : STD_LOGIC;
-    signal ap_sync_done : STD_LOGIC;
-    signal ap_sync_ready : STD_LOGIC;
     signal start_for_play_output_lanes2ou_U0_din : STD_LOGIC_VECTOR (0 downto 0);
     signal start_for_play_output_lanes2ou_U0_full_n : STD_LOGIC;
     signal start_for_play_output_lanes2ou_U0_dout : STD_LOGIC_VECTOR (0 downto 0);
@@ -1891,18 +1885,13 @@ begin
 
 
 
-    ap_done <= play_output_lanes2ou_U0_ap_done;
-    ap_idle <= (sort_input_lanes_U0_ap_idle and play_output_lanes2ou_U0_ap_idle);
-    ap_ready <= sort_input_lanes_U0_ap_ready;
 
     ap_rst_n_inv_assign_proc : process(ap_rst_n)
     begin
                 ap_rst_n_inv <= not(ap_rst_n);
     end process;
 
-    ap_sync_continue <= ap_const_logic_1;
-    ap_sync_done <= play_output_lanes2ou_U0_ap_done;
-    ap_sync_ready <= sort_input_lanes_U0_ap_ready;
+    ap_sync_continue <= ap_const_logic_0;
     i_output_TDATA <= play_output_lanes2ou_U0_i_output_TDATA;
     i_output_TLAST <= play_output_lanes2ou_U0_i_output_TLAST;
     i_output_TVALID <= play_output_lanes2ou_U0_i_output_TVALID;
@@ -1930,6 +1919,6 @@ begin
     q_output_TLAST <= play_output_lanes2ou_U0_q_output_TLAST;
     q_output_TVALID <= play_output_lanes2ou_U0_q_output_TVALID;
     sort_input_lanes_U0_ap_continue <= ap_const_logic_1;
-    sort_input_lanes_U0_ap_start <= ap_start;
+    sort_input_lanes_U0_ap_start <= ap_const_logic_1;
     start_for_play_output_lanes2ou_U0_din <= (0=>ap_const_logic_1, others=>'-');
 end behav;

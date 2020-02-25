@@ -7,7 +7,7 @@
 
 `timescale 1 ns / 1 ps 
 
-(* CORE_GENERATION_INFO="fir_to_fftx16x2,hls_ip_2019_2_1,{HLS_INPUT_TYPE=cxx,HLS_INPUT_FLOAT=0,HLS_INPUT_FIXED=0,HLS_INPUT_PART=xczu28dr-ffvg1517-2-e,HLS_INPUT_CLOCK=1.818000,HLS_INPUT_ARCH=dataflow,HLS_SYN_CLOCK=1.351750,HLS_SYN_LAT=514,HLS_SYN_TPT=512,HLS_SYN_MEM=96,HLS_SYN_DSP=0,HLS_SYN_FF=3248,HLS_SYN_LUT=4047,HLS_VERSION=2019_2_1}" *)
+(* CORE_GENERATION_INFO="fir_to_fftx16x2,hls_ip_2019_2_1,{HLS_INPUT_TYPE=cxx,HLS_INPUT_FLOAT=0,HLS_INPUT_FIXED=0,HLS_INPUT_PART=xczu28dr-ffvg1517-2-e,HLS_INPUT_CLOCK=1.818000,HLS_INPUT_ARCH=dataflow,HLS_SYN_CLOCK=1.351750,HLS_SYN_LAT=514,HLS_SYN_TPT=512,HLS_SYN_MEM=96,HLS_SYN_DSP=0,HLS_SYN_FF=3248,HLS_SYN_LUT=4045,HLS_VERSION=2019_2_1}" *)
 
 module fir_to_fftx16x2 (
         input_0_TDATA,
@@ -80,14 +80,10 @@ module fir_to_fftx16x2 (
         input_14_TREADY,
         input_15_TVALID,
         input_15_TREADY,
-        ap_start,
         i_output_TVALID,
         i_output_TREADY,
         q_output_TVALID,
-        q_output_TREADY,
-        ap_done,
-        ap_ready,
-        ap_idle
+        q_output_TREADY
 );
 
 
@@ -161,14 +157,10 @@ input   input_14_TVALID;
 output   input_14_TREADY;
 input   input_15_TVALID;
 output   input_15_TREADY;
-input   ap_start;
 output   i_output_TVALID;
 input   i_output_TREADY;
 output   q_output_TVALID;
 input   q_output_TREADY;
-output   ap_done;
-output   ap_ready;
-output   ap_idle;
 
  reg    ap_rst_n_inv;
 wire    sort_input_lanes_U0_ap_start;
@@ -494,8 +486,6 @@ wire    C_14_empty_n;
 wire    C_15_full_n;
 wire   [31:0] C_15_dout;
 wire    C_15_empty_n;
-wire    ap_sync_done;
-wire    ap_sync_ready;
 wire   [0:0] start_for_play_output_lanes2ou_U0_din;
 wire    start_for_play_output_lanes2ou_U0_full_n;
 wire   [0:0] start_for_play_output_lanes2ou_U0_dout;
@@ -1523,21 +1513,11 @@ start_for_play_oubkb start_for_play_oubkb_U(
     .if_read(play_output_lanes2ou_U0_ap_ready)
 );
 
-assign ap_done = play_output_lanes2ou_U0_ap_done;
-
-assign ap_idle = (sort_input_lanes_U0_ap_idle & play_output_lanes2ou_U0_ap_idle);
-
-assign ap_ready = sort_input_lanes_U0_ap_ready;
-
 always @ (*) begin
     ap_rst_n_inv = ~ap_rst_n;
 end
 
-assign ap_sync_continue = 1'b1;
-
-assign ap_sync_done = play_output_lanes2ou_U0_ap_done;
-
-assign ap_sync_ready = sort_input_lanes_U0_ap_ready;
+assign ap_sync_continue = 1'b0;
 
 assign i_output_TDATA = play_output_lanes2ou_U0_i_output_TDATA;
 
@@ -1593,7 +1573,7 @@ assign q_output_TVALID = play_output_lanes2ou_U0_q_output_TVALID;
 
 assign sort_input_lanes_U0_ap_continue = 1'b1;
 
-assign sort_input_lanes_U0_ap_start = ap_start;
+assign sort_input_lanes_U0_ap_start = 1'b1;
 
 assign start_for_play_output_lanes2ou_U0_din = 1'b1;
 

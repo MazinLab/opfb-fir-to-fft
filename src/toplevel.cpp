@@ -153,7 +153,7 @@ void fir_to_fftx16x2(pfbaxisin_t input[N_LANES][N_CHAN_PLANE*2], fftaxisin_t i_o
 #pragma HLS INTERFACE axis port=input register=reverse
 #pragma HLS INTERFACE axis port=i_output register=forward
 #pragma HLS INTERFACE axis port=q_output register=forward
-//#pragma HLS INTERFACE ap_ctrl_none port=return
+#pragma HLS INTERFACE ap_ctrl_none port=return
 
 
 	hls::stream<iq_t> A[N_LANES], B[N_LANES], C[N_LANES];
