@@ -8,9 +8,16 @@
 
 typedef ap_uint<32> iq_t;
 
+typedef ap_uint<16> sample_t;
+
 typedef struct {
   iq_t data;
   ap_uint<1> last;
 } pfbaxisin_t;
+
+typedef struct {
+	sample_t data[N_LANES];
+	ap_uint<1> last;
+} fftaxisin_t;
 
 #endif
