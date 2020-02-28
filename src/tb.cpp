@@ -11,7 +11,6 @@ using namespace std;
 int main(){
 
 	pfbaxisin_t lanein[N_CYCLES][N_LANES][N_CHAN_PLANE*2], laneout[N_CYCLES][N_LANES][N_CHAN_PLANE*2];
-	fftaxisin_t i_out[N_CHAN_PLANE*2], q_out[N_CHAN_PLANE*2];
 	bool fail=false;
 
 	//Generate data
@@ -27,13 +26,7 @@ int main(){
 
 	//Run the stream input
 	for (int i=0; i<N_CYCLES;i++) { // Go through more than once to see the phase increment
-		fir_to_fftx16x2(lanein[i], i_out, q_out);
-		for (int j=0;j<N_LANES;j++) {
-			for (int k=0; k<N_CHAN_PLANE*2;k++) {
-				laneout[i][j][k].last=i_out[k].last | q_out[k].last;
-				laneout[i][j][k].data=i_out[k].data[j] | (q_out[k].data[j]<<16);
-			}
-		}
+		fir_to_fft(lanein[i], laneout[i]);
 	}
 
 	//Compare the result

@@ -15,9 +15,4 @@ typedef struct {
   ap_uint<1> last;
 } pfbaxisin_t;
 
-typedef struct {
-	sample_t data[N_LANES];
-	ap_uint<1> last;
-} fftaxisin_t;
-
 #endif
