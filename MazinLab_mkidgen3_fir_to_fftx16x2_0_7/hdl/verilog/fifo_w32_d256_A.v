@@ -5,12 +5,12 @@
 
 `timescale 1ns/1ps
 
-module fifo_w32_d128_D
+module fifo_w32_d256_A
 #(parameter
-    MEM_STYLE   = "distributed",
+    MEM_STYLE   = "block",
     DATA_WIDTH  = 32,
-    ADDR_WIDTH  = 7,
-    DEPTH       = 128
+    ADDR_WIDTH  = 8,
+    DEPTH       = 256
 )
 (
     // system signal

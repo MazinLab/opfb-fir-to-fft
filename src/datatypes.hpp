@@ -20,4 +20,10 @@ typedef struct {
 	ap_uint<1> last;
 } fftaxisin_t;
 
+typedef struct {
+	iq_t iq[N_LANES];
+	ap_uint<1> last;
+} fftout_t;
+
+
 #endif

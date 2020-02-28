@@ -7,12 +7,12 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-entity fifo_w32_d128_D is
+entity fifo_w32_d256_A is
     generic (
-        MEM_STYLE   : string  := "distributed";
+        MEM_STYLE   : string  := "block";
         DATA_WIDTH  : natural := 32;
-        ADDR_WIDTH  : natural := 7;
-        DEPTH       : natural := 128
+        ADDR_WIDTH  : natural := 8;
+        DEPTH       : natural := 256
     );
     port (
         clk         : in  std_logic;
@@ -28,7 +28,7 @@ entity fifo_w32_d128_D is
     );
 end entity;
 
-architecture arch of fifo_w32_d128_D is
+architecture arch of fifo_w32_d256_A is
     type memtype is array (0 to DEPTH - 1) of std_logic_vector(DATA_WIDTH - 1 downto 0);
     signal mem        : memtype;
     signal q_buf      : std_logic_vector(DATA_WIDTH - 1 downto 0) := (others => '0');

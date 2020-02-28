@@ -8,4 +8,4 @@ typedef ap_shift_reg<iq_t, N_CHAN_PLANE> iqChanDelay_t;
 typedef ap_shift_reg<iq_t, N_CHAN_PLANE/2> iqHalfChanDelay_t;
 
 void fir_to_fftx16(pfbaxisin_t input[N_LANES][N_CHAN_PLANE*2], pfbaxisin_t output[N_LANES][N_CHAN_PLANE*2]);
-void fir_to_fftx16x2(pfbaxisin_t input[N_LANES][N_CHAN_PLANE*2], fftaxisin_t i_output[N_CHAN_PLANE*2], fftaxisin_t q_output[N_CHAN_PLANE*2]);
+void fir_to_fftx16x2(pfbaxisin_t input[N_LANES][N_CHAN_PLANE*2], fftout_t output[N_CHAN_PLANE*2]);
