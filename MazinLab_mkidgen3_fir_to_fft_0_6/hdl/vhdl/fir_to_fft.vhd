@@ -9,7 +9,7 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 
-entity fir_to_fftx16x2 is
+entity fir_to_fft is
 port (
     input_0_TDATA : IN STD_LOGIC_VECTOR (31 downto 0);
     input_1_TDATA : IN STD_LOGIC_VECTOR (31 downto 0);
@@ -43,10 +43,8 @@ port (
     input_13_TLAST : IN STD_LOGIC_VECTOR (0 downto 0);
     input_14_TLAST : IN STD_LOGIC_VECTOR (0 downto 0);
     input_15_TLAST : IN STD_LOGIC_VECTOR (0 downto 0);
-    i_output_TDATA : OUT STD_LOGIC_VECTOR (255 downto 0);
-    i_output_TLAST : OUT STD_LOGIC_VECTOR (0 downto 0);
-    q_output_TDATA : OUT STD_LOGIC_VECTOR (255 downto 0);
-    q_output_TLAST : OUT STD_LOGIC_VECTOR (0 downto 0);
+    output_r_TDATA : OUT STD_LOGIC_VECTOR (511 downto 0);
+    output_r_TLAST : OUT STD_LOGIC_VECTOR (0 downto 0);
     ap_clk : IN STD_LOGIC;
     ap_rst_n : IN STD_LOGIC;
     input_0_TVALID : IN STD_LOGIC;
@@ -81,18 +79,16 @@ port (
     input_14_TREADY : OUT STD_LOGIC;
     input_15_TVALID : IN STD_LOGIC;
     input_15_TREADY : OUT STD_LOGIC;
-    i_output_TVALID : OUT STD_LOGIC;
-    i_output_TREADY : IN STD_LOGIC;
-    q_output_TVALID : OUT STD_LOGIC;
-    q_output_TREADY : IN STD_LOGIC );
+    output_r_TVALID : OUT STD_LOGIC;
+    output_r_TREADY : IN STD_LOGIC );
 end;
 
 
-architecture behav of fir_to_fftx16x2 is 
+architecture behav of fir_to_fft is 
     attribute CORE_GENERATION_INFO : STRING;
     attribute CORE_GENERATION_INFO of behav : architecture is
-    "fir_to_fftx16x2,hls_ip_2019_2_1,{HLS_INPUT_TYPE=cxx,HLS_INPUT_FLOAT=0,HLS_INPUT_FIXED=0,HLS_INPUT_PART=xczu28dr-ffvg1517-2-e,HLS_INPUT_CLOCK=1.818000,HLS_INPUT_ARCH=dataflow,HLS_SYN_CLOCK=1.351750,HLS_SYN_LAT=514,HLS_SYN_TPT=512,HLS_SYN_MEM=96,HLS_SYN_DSP=0,HLS_SYN_FF=3248,HLS_SYN_LUT=4045,HLS_VERSION=2019_2_1}";
-    constant ap_const_lv256_lc_1 : STD_LOGIC_VECTOR (255 downto 0) := "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+    "fir_to_fft,hls_ip_2019_2_1,{HLS_INPUT_TYPE=cxx,HLS_INPUT_FLOAT=0,HLS_INPUT_FIXED=0,HLS_INPUT_PART=xczu28dr-ffvg1517-2-e,HLS_INPUT_CLOCK=1.538000,HLS_INPUT_ARCH=dataflow,HLS_SYN_CLOCK=1.167625,HLS_SYN_LAT=515,HLS_SYN_TPT=512,HLS_SYN_MEM=96,HLS_SYN_DSP=0,HLS_SYN_FF=4789,HLS_SYN_LUT=4041,HLS_VERSION=2019_2_1}";
+    constant ap_const_lv512_lc_1 : STD_LOGIC_VECTOR (511 downto 0) := "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
     constant ap_const_lv1_0 : STD_LOGIC_VECTOR (0 downto 0) := "0";
     constant ap_const_logic_1 : STD_LOGIC := '1';
     constant ap_const_logic_0 : STD_LOGIC := '0';
@@ -217,65 +213,62 @@ architecture behav of fir_to_fftx16x2 is
     signal sort_input_lanes_U0_input_13_TREADY : STD_LOGIC;
     signal sort_input_lanes_U0_input_14_TREADY : STD_LOGIC;
     signal sort_input_lanes_U0_input_15_TREADY : STD_LOGIC;
-    signal play_output_lanes2ou_U0_ap_start : STD_LOGIC;
-    signal play_output_lanes2ou_U0_ap_done : STD_LOGIC;
-    signal play_output_lanes2ou_U0_ap_continue : STD_LOGIC;
-    signal play_output_lanes2ou_U0_ap_idle : STD_LOGIC;
-    signal play_output_lanes2ou_U0_ap_ready : STD_LOGIC;
-    signal play_output_lanes2ou_U0_A_0_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_A_1_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_A_2_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_A_3_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_A_4_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_A_5_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_A_6_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_A_7_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_A_8_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_A_9_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_A_10_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_A_11_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_A_12_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_A_13_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_A_14_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_A_15_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_B_0_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_B_1_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_B_2_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_B_3_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_B_4_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_B_5_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_B_6_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_B_7_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_B_8_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_B_9_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_B_10_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_B_11_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_B_12_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_B_13_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_B_14_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_B_15_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_C_0_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_C_1_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_C_2_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_C_3_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_C_4_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_C_5_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_C_6_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_C_7_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_C_8_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_C_9_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_C_10_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_C_11_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_C_12_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_C_13_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_C_14_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_C_15_V_V_read : STD_LOGIC;
-    signal play_output_lanes2ou_U0_i_output_TDATA : STD_LOGIC_VECTOR (255 downto 0);
-    signal play_output_lanes2ou_U0_i_output_TVALID : STD_LOGIC;
-    signal play_output_lanes2ou_U0_i_output_TLAST : STD_LOGIC_VECTOR (0 downto 0);
-    signal play_output_lanes2ou_U0_q_output_TDATA : STD_LOGIC_VECTOR (255 downto 0);
-    signal play_output_lanes2ou_U0_q_output_TVALID : STD_LOGIC;
-    signal play_output_lanes2ou_U0_q_output_TLAST : STD_LOGIC_VECTOR (0 downto 0);
+    signal play_output_lanes_U0_ap_start : STD_LOGIC;
+    signal play_output_lanes_U0_ap_done : STD_LOGIC;
+    signal play_output_lanes_U0_ap_continue : STD_LOGIC;
+    signal play_output_lanes_U0_ap_idle : STD_LOGIC;
+    signal play_output_lanes_U0_ap_ready : STD_LOGIC;
+    signal play_output_lanes_U0_A_0_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_A_1_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_A_2_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_A_3_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_A_4_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_A_5_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_A_6_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_A_7_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_A_8_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_A_9_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_A_10_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_A_11_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_A_12_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_A_13_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_A_14_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_A_15_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_B_0_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_B_1_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_B_2_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_B_3_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_B_4_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_B_5_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_B_6_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_B_7_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_B_8_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_B_9_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_B_10_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_B_11_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_B_12_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_B_13_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_B_14_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_B_15_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_C_0_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_C_1_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_C_2_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_C_3_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_C_4_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_C_5_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_C_6_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_C_7_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_C_8_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_C_9_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_C_10_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_C_11_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_C_12_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_C_13_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_C_14_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_C_15_V_V_read : STD_LOGIC;
+    signal play_output_lanes_U0_output_r_TDATA : STD_LOGIC_VECTOR (511 downto 0);
+    signal play_output_lanes_U0_output_r_TVALID : STD_LOGIC;
+    signal play_output_lanes_U0_output_r_TLAST : STD_LOGIC_VECTOR (0 downto 0);
     signal ap_sync_continue : STD_LOGIC;
     signal A_0_full_n : STD_LOGIC;
     signal A_0_dout : STD_LOGIC_VECTOR (31 downto 0);
@@ -421,12 +414,12 @@ architecture behav of fir_to_fftx16x2 is
     signal C_15_full_n : STD_LOGIC;
     signal C_15_dout : STD_LOGIC_VECTOR (31 downto 0);
     signal C_15_empty_n : STD_LOGIC;
-    signal start_for_play_output_lanes2ou_U0_din : STD_LOGIC_VECTOR (0 downto 0);
-    signal start_for_play_output_lanes2ou_U0_full_n : STD_LOGIC;
-    signal start_for_play_output_lanes2ou_U0_dout : STD_LOGIC_VECTOR (0 downto 0);
-    signal start_for_play_output_lanes2ou_U0_empty_n : STD_LOGIC;
-    signal play_output_lanes2ou_U0_start_full_n : STD_LOGIC;
-    signal play_output_lanes2ou_U0_start_write : STD_LOGIC;
+    signal start_for_play_output_lanes_U0_din : STD_LOGIC_VECTOR (0 downto 0);
+    signal start_for_play_output_lanes_U0_full_n : STD_LOGIC;
+    signal start_for_play_output_lanes_U0_dout : STD_LOGIC_VECTOR (0 downto 0);
+    signal start_for_play_output_lanes_U0_empty_n : STD_LOGIC;
+    signal play_output_lanes_U0_start_full_n : STD_LOGIC;
+    signal play_output_lanes_U0_start_write : STD_LOGIC;
 
     component sort_input_lanes IS
     port (
@@ -651,7 +644,7 @@ architecture behav of fir_to_fftx16x2 is
     end component;
 
 
-    component play_output_lanes2ou IS
+    component play_output_lanes IS
     port (
         ap_clk : IN STD_LOGIC;
         ap_rst : IN STD_LOGIC;
@@ -660,8 +653,7 @@ architecture behav of fir_to_fftx16x2 is
         ap_continue : IN STD_LOGIC;
         ap_idle : OUT STD_LOGIC;
         ap_ready : OUT STD_LOGIC;
-        i_output_TREADY : IN STD_LOGIC;
-        q_output_TREADY : IN STD_LOGIC;
+        output_r_TREADY : IN STD_LOGIC;
         A_0_V_V_dout : IN STD_LOGIC_VECTOR (31 downto 0);
         A_0_V_V_empty_n : IN STD_LOGIC;
         A_0_V_V_read : OUT STD_LOGIC;
@@ -806,12 +798,9 @@ architecture behav of fir_to_fftx16x2 is
         C_15_V_V_dout : IN STD_LOGIC_VECTOR (31 downto 0);
         C_15_V_V_empty_n : IN STD_LOGIC;
         C_15_V_V_read : OUT STD_LOGIC;
-        i_output_TDATA : OUT STD_LOGIC_VECTOR (255 downto 0);
-        i_output_TVALID : OUT STD_LOGIC;
-        i_output_TLAST : OUT STD_LOGIC_VECTOR (0 downto 0);
-        q_output_TDATA : OUT STD_LOGIC_VECTOR (255 downto 0);
-        q_output_TVALID : OUT STD_LOGIC;
-        q_output_TLAST : OUT STD_LOGIC_VECTOR (0 downto 0) );
+        output_r_TDATA : OUT STD_LOGIC_VECTOR (511 downto 0);
+        output_r_TVALID : OUT STD_LOGIC;
+        output_r_TLAST : OUT STD_LOGIC_VECTOR (0 downto 0) );
     end component;
 
 
@@ -867,7 +856,7 @@ begin
         ap_clk => ap_clk,
         ap_rst => ap_rst_n_inv,
         ap_start => sort_input_lanes_U0_ap_start,
-        start_full_n => start_for_play_output_lanes2ou_U0_full_n,
+        start_full_n => start_for_play_output_lanes_U0_full_n,
         ap_done => sort_input_lanes_U0_ap_done,
         ap_continue => sort_input_lanes_U0_ap_continue,
         ap_idle => sort_input_lanes_U0_ap_idle,
@@ -1083,167 +1072,163 @@ begin
         input_14_TLAST => input_14_TLAST,
         input_15_TLAST => input_15_TLAST);
 
-    play_output_lanes2ou_U0 : component play_output_lanes2ou
+    play_output_lanes_U0 : component play_output_lanes
     port map (
         ap_clk => ap_clk,
         ap_rst => ap_rst_n_inv,
-        ap_start => play_output_lanes2ou_U0_ap_start,
-        ap_done => play_output_lanes2ou_U0_ap_done,
-        ap_continue => play_output_lanes2ou_U0_ap_continue,
-        ap_idle => play_output_lanes2ou_U0_ap_idle,
-        ap_ready => play_output_lanes2ou_U0_ap_ready,
-        i_output_TREADY => i_output_TREADY,
-        q_output_TREADY => q_output_TREADY,
+        ap_start => play_output_lanes_U0_ap_start,
+        ap_done => play_output_lanes_U0_ap_done,
+        ap_continue => play_output_lanes_U0_ap_continue,
+        ap_idle => play_output_lanes_U0_ap_idle,
+        ap_ready => play_output_lanes_U0_ap_ready,
+        output_r_TREADY => output_r_TREADY,
         A_0_V_V_dout => A_0_dout,
         A_0_V_V_empty_n => A_0_empty_n,
-        A_0_V_V_read => play_output_lanes2ou_U0_A_0_V_V_read,
+        A_0_V_V_read => play_output_lanes_U0_A_0_V_V_read,
         A_1_V_V_dout => A_1_dout,
         A_1_V_V_empty_n => A_1_empty_n,
-        A_1_V_V_read => play_output_lanes2ou_U0_A_1_V_V_read,
+        A_1_V_V_read => play_output_lanes_U0_A_1_V_V_read,
         A_2_V_V_dout => A_2_dout,
         A_2_V_V_empty_n => A_2_empty_n,
-        A_2_V_V_read => play_output_lanes2ou_U0_A_2_V_V_read,
+        A_2_V_V_read => play_output_lanes_U0_A_2_V_V_read,
         A_3_V_V_dout => A_3_dout,
         A_3_V_V_empty_n => A_3_empty_n,
-        A_3_V_V_read => play_output_lanes2ou_U0_A_3_V_V_read,
+        A_3_V_V_read => play_output_lanes_U0_A_3_V_V_read,
         A_4_V_V_dout => A_4_dout,
         A_4_V_V_empty_n => A_4_empty_n,
-        A_4_V_V_read => play_output_lanes2ou_U0_A_4_V_V_read,
+        A_4_V_V_read => play_output_lanes_U0_A_4_V_V_read,
         A_5_V_V_dout => A_5_dout,
         A_5_V_V_empty_n => A_5_empty_n,
-        A_5_V_V_read => play_output_lanes2ou_U0_A_5_V_V_read,
+        A_5_V_V_read => play_output_lanes_U0_A_5_V_V_read,
         A_6_V_V_dout => A_6_dout,
         A_6_V_V_empty_n => A_6_empty_n,
-        A_6_V_V_read => play_output_lanes2ou_U0_A_6_V_V_read,
+        A_6_V_V_read => play_output_lanes_U0_A_6_V_V_read,
         A_7_V_V_dout => A_7_dout,
         A_7_V_V_empty_n => A_7_empty_n,
-        A_7_V_V_read => play_output_lanes2ou_U0_A_7_V_V_read,
+        A_7_V_V_read => play_output_lanes_U0_A_7_V_V_read,
         A_8_V_V_dout => A_8_dout,
         A_8_V_V_empty_n => A_8_empty_n,
-        A_8_V_V_read => play_output_lanes2ou_U0_A_8_V_V_read,
+        A_8_V_V_read => play_output_lanes_U0_A_8_V_V_read,
         A_9_V_V_dout => A_9_dout,
         A_9_V_V_empty_n => A_9_empty_n,
-        A_9_V_V_read => play_output_lanes2ou_U0_A_9_V_V_read,
+        A_9_V_V_read => play_output_lanes_U0_A_9_V_V_read,
         A_10_V_V_dout => A_10_dout,
         A_10_V_V_empty_n => A_10_empty_n,
-        A_10_V_V_read => play_output_lanes2ou_U0_A_10_V_V_read,
+        A_10_V_V_read => play_output_lanes_U0_A_10_V_V_read,
         A_11_V_V_dout => A_11_dout,
         A_11_V_V_empty_n => A_11_empty_n,
-        A_11_V_V_read => play_output_lanes2ou_U0_A_11_V_V_read,
+        A_11_V_V_read => play_output_lanes_U0_A_11_V_V_read,
         A_12_V_V_dout => A_12_dout,
         A_12_V_V_empty_n => A_12_empty_n,
-        A_12_V_V_read => play_output_lanes2ou_U0_A_12_V_V_read,
+        A_12_V_V_read => play_output_lanes_U0_A_12_V_V_read,
         A_13_V_V_dout => A_13_dout,
         A_13_V_V_empty_n => A_13_empty_n,
-        A_13_V_V_read => play_output_lanes2ou_U0_A_13_V_V_read,
+        A_13_V_V_read => play_output_lanes_U0_A_13_V_V_read,
         A_14_V_V_dout => A_14_dout,
         A_14_V_V_empty_n => A_14_empty_n,
-        A_14_V_V_read => play_output_lanes2ou_U0_A_14_V_V_read,
+        A_14_V_V_read => play_output_lanes_U0_A_14_V_V_read,
         A_15_V_V_dout => A_15_dout,
         A_15_V_V_empty_n => A_15_empty_n,
-        A_15_V_V_read => play_output_lanes2ou_U0_A_15_V_V_read,
+        A_15_V_V_read => play_output_lanes_U0_A_15_V_V_read,
         B_0_V_V_dout => B_0_dout,
         B_0_V_V_empty_n => B_0_empty_n,
-        B_0_V_V_read => play_output_lanes2ou_U0_B_0_V_V_read,
+        B_0_V_V_read => play_output_lanes_U0_B_0_V_V_read,
         B_1_V_V_dout => B_1_dout,
         B_1_V_V_empty_n => B_1_empty_n,
-        B_1_V_V_read => play_output_lanes2ou_U0_B_1_V_V_read,
+        B_1_V_V_read => play_output_lanes_U0_B_1_V_V_read,
         B_2_V_V_dout => B_2_dout,
         B_2_V_V_empty_n => B_2_empty_n,
-        B_2_V_V_read => play_output_lanes2ou_U0_B_2_V_V_read,
+        B_2_V_V_read => play_output_lanes_U0_B_2_V_V_read,
         B_3_V_V_dout => B_3_dout,
         B_3_V_V_empty_n => B_3_empty_n,
-        B_3_V_V_read => play_output_lanes2ou_U0_B_3_V_V_read,
+        B_3_V_V_read => play_output_lanes_U0_B_3_V_V_read,
         B_4_V_V_dout => B_4_dout,
         B_4_V_V_empty_n => B_4_empty_n,
-        B_4_V_V_read => play_output_lanes2ou_U0_B_4_V_V_read,
+        B_4_V_V_read => play_output_lanes_U0_B_4_V_V_read,
         B_5_V_V_dout => B_5_dout,
         B_5_V_V_empty_n => B_5_empty_n,
-        B_5_V_V_read => play_output_lanes2ou_U0_B_5_V_V_read,
+        B_5_V_V_read => play_output_lanes_U0_B_5_V_V_read,
         B_6_V_V_dout => B_6_dout,
         B_6_V_V_empty_n => B_6_empty_n,
-        B_6_V_V_read => play_output_lanes2ou_U0_B_6_V_V_read,
+        B_6_V_V_read => play_output_lanes_U0_B_6_V_V_read,
         B_7_V_V_dout => B_7_dout,
         B_7_V_V_empty_n => B_7_empty_n,
-        B_7_V_V_read => play_output_lanes2ou_U0_B_7_V_V_read,
+        B_7_V_V_read => play_output_lanes_U0_B_7_V_V_read,
         B_8_V_V_dout => B_8_dout,
         B_8_V_V_empty_n => B_8_empty_n,
-        B_8_V_V_read => play_output_lanes2ou_U0_B_8_V_V_read,
+        B_8_V_V_read => play_output_lanes_U0_B_8_V_V_read,
         B_9_V_V_dout => B_9_dout,
         B_9_V_V_empty_n => B_9_empty_n,
-        B_9_V_V_read => play_output_lanes2ou_U0_B_9_V_V_read,
+        B_9_V_V_read => play_output_lanes_U0_B_9_V_V_read,
         B_10_V_V_dout => B_10_dout,
         B_10_V_V_empty_n => B_10_empty_n,
-        B_10_V_V_read => play_output_lanes2ou_U0_B_10_V_V_read,
+        B_10_V_V_read => play_output_lanes_U0_B_10_V_V_read,
         B_11_V_V_dout => B_11_dout,
         B_11_V_V_empty_n => B_11_empty_n,
-        B_11_V_V_read => play_output_lanes2ou_U0_B_11_V_V_read,
+        B_11_V_V_read => play_output_lanes_U0_B_11_V_V_read,
         B_12_V_V_dout => B_12_dout,
         B_12_V_V_empty_n => B_12_empty_n,
-        B_12_V_V_read => play_output_lanes2ou_U0_B_12_V_V_read,
+        B_12_V_V_read => play_output_lanes_U0_B_12_V_V_read,
         B_13_V_V_dout => B_13_dout,
         B_13_V_V_empty_n => B_13_empty_n,
-        B_13_V_V_read => play_output_lanes2ou_U0_B_13_V_V_read,
+        B_13_V_V_read => play_output_lanes_U0_B_13_V_V_read,
         B_14_V_V_dout => B_14_dout,
         B_14_V_V_empty_n => B_14_empty_n,
-        B_14_V_V_read => play_output_lanes2ou_U0_B_14_V_V_read,
+        B_14_V_V_read => play_output_lanes_U0_B_14_V_V_read,
         B_15_V_V_dout => B_15_dout,
         B_15_V_V_empty_n => B_15_empty_n,
-        B_15_V_V_read => play_output_lanes2ou_U0_B_15_V_V_read,
+        B_15_V_V_read => play_output_lanes_U0_B_15_V_V_read,
         C_0_V_V_dout => C_0_dout,
         C_0_V_V_empty_n => C_0_empty_n,
-        C_0_V_V_read => play_output_lanes2ou_U0_C_0_V_V_read,
+        C_0_V_V_read => play_output_lanes_U0_C_0_V_V_read,
         C_1_V_V_dout => C_1_dout,
         C_1_V_V_empty_n => C_1_empty_n,
-        C_1_V_V_read => play_output_lanes2ou_U0_C_1_V_V_read,
+        C_1_V_V_read => play_output_lanes_U0_C_1_V_V_read,
         C_2_V_V_dout => C_2_dout,
         C_2_V_V_empty_n => C_2_empty_n,
-        C_2_V_V_read => play_output_lanes2ou_U0_C_2_V_V_read,
+        C_2_V_V_read => play_output_lanes_U0_C_2_V_V_read,
         C_3_V_V_dout => C_3_dout,
         C_3_V_V_empty_n => C_3_empty_n,
-        C_3_V_V_read => play_output_lanes2ou_U0_C_3_V_V_read,
+        C_3_V_V_read => play_output_lanes_U0_C_3_V_V_read,
         C_4_V_V_dout => C_4_dout,
         C_4_V_V_empty_n => C_4_empty_n,
-        C_4_V_V_read => play_output_lanes2ou_U0_C_4_V_V_read,
+        C_4_V_V_read => play_output_lanes_U0_C_4_V_V_read,
         C_5_V_V_dout => C_5_dout,
         C_5_V_V_empty_n => C_5_empty_n,
-        C_5_V_V_read => play_output_lanes2ou_U0_C_5_V_V_read,
+        C_5_V_V_read => play_output_lanes_U0_C_5_V_V_read,
         C_6_V_V_dout => C_6_dout,
         C_6_V_V_empty_n => C_6_empty_n,
-        C_6_V_V_read => play_output_lanes2ou_U0_C_6_V_V_read,
+        C_6_V_V_read => play_output_lanes_U0_C_6_V_V_read,
         C_7_V_V_dout => C_7_dout,
         C_7_V_V_empty_n => C_7_empty_n,
-        C_7_V_V_read => play_output_lanes2ou_U0_C_7_V_V_read,
+        C_7_V_V_read => play_output_lanes_U0_C_7_V_V_read,
         C_8_V_V_dout => C_8_dout,
         C_8_V_V_empty_n => C_8_empty_n,
-        C_8_V_V_read => play_output_lanes2ou_U0_C_8_V_V_read,
+        C_8_V_V_read => play_output_lanes_U0_C_8_V_V_read,
         C_9_V_V_dout => C_9_dout,
         C_9_V_V_empty_n => C_9_empty_n,
-        C_9_V_V_read => play_output_lanes2ou_U0_C_9_V_V_read,
+        C_9_V_V_read => play_output_lanes_U0_C_9_V_V_read,
         C_10_V_V_dout => C_10_dout,
         C_10_V_V_empty_n => C_10_empty_n,
-        C_10_V_V_read => play_output_lanes2ou_U0_C_10_V_V_read,
+        C_10_V_V_read => play_output_lanes_U0_C_10_V_V_read,
         C_11_V_V_dout => C_11_dout,
         C_11_V_V_empty_n => C_11_empty_n,
-        C_11_V_V_read => play_output_lanes2ou_U0_C_11_V_V_read,
+        C_11_V_V_read => play_output_lanes_U0_C_11_V_V_read,
         C_12_V_V_dout => C_12_dout,
         C_12_V_V_empty_n => C_12_empty_n,
-        C_12_V_V_read => play_output_lanes2ou_U0_C_12_V_V_read,
+        C_12_V_V_read => play_output_lanes_U0_C_12_V_V_read,
         C_13_V_V_dout => C_13_dout,
         C_13_V_V_empty_n => C_13_empty_n,
-        C_13_V_V_read => play_output_lanes2ou_U0_C_13_V_V_read,
+        C_13_V_V_read => play_output_lanes_U0_C_13_V_V_read,
         C_14_V_V_dout => C_14_dout,
         C_14_V_V_empty_n => C_14_empty_n,
-        C_14_V_V_read => play_output_lanes2ou_U0_C_14_V_V_read,
+        C_14_V_V_read => play_output_lanes_U0_C_14_V_V_read,
         C_15_V_V_dout => C_15_dout,
         C_15_V_V_empty_n => C_15_empty_n,
-        C_15_V_V_read => play_output_lanes2ou_U0_C_15_V_V_read,
-        i_output_TDATA => play_output_lanes2ou_U0_i_output_TDATA,
-        i_output_TVALID => play_output_lanes2ou_U0_i_output_TVALID,
-        i_output_TLAST => play_output_lanes2ou_U0_i_output_TLAST,
-        q_output_TDATA => play_output_lanes2ou_U0_q_output_TDATA,
-        q_output_TVALID => play_output_lanes2ou_U0_q_output_TVALID,
-        q_output_TLAST => play_output_lanes2ou_U0_q_output_TLAST);
+        C_15_V_V_read => play_output_lanes_U0_C_15_V_V_read,
+        output_r_TDATA => play_output_lanes_U0_output_r_TDATA,
+        output_r_TVALID => play_output_lanes_U0_output_r_TVALID,
+        output_r_TLAST => play_output_lanes_U0_output_r_TLAST);
 
     A_0_U : component fifo_w32_d256_A
     port map (
@@ -1256,7 +1241,7 @@ begin
         if_write => sort_input_lanes_U0_A_0_V_V_write,
         if_dout => A_0_dout,
         if_empty_n => A_0_empty_n,
-        if_read => play_output_lanes2ou_U0_A_0_V_V_read);
+        if_read => play_output_lanes_U0_A_0_V_V_read);
 
     A_1_U : component fifo_w32_d256_A
     port map (
@@ -1269,7 +1254,7 @@ begin
         if_write => sort_input_lanes_U0_A_1_V_V_write,
         if_dout => A_1_dout,
         if_empty_n => A_1_empty_n,
-        if_read => play_output_lanes2ou_U0_A_1_V_V_read);
+        if_read => play_output_lanes_U0_A_1_V_V_read);
 
     A_2_U : component fifo_w32_d256_A
     port map (
@@ -1282,7 +1267,7 @@ begin
         if_write => sort_input_lanes_U0_A_2_V_V_write,
         if_dout => A_2_dout,
         if_empty_n => A_2_empty_n,
-        if_read => play_output_lanes2ou_U0_A_2_V_V_read);
+        if_read => play_output_lanes_U0_A_2_V_V_read);
 
     A_3_U : component fifo_w32_d256_A
     port map (
@@ -1295,7 +1280,7 @@ begin
         if_write => sort_input_lanes_U0_A_3_V_V_write,
         if_dout => A_3_dout,
         if_empty_n => A_3_empty_n,
-        if_read => play_output_lanes2ou_U0_A_3_V_V_read);
+        if_read => play_output_lanes_U0_A_3_V_V_read);
 
     A_4_U : component fifo_w32_d256_A
     port map (
@@ -1308,7 +1293,7 @@ begin
         if_write => sort_input_lanes_U0_A_4_V_V_write,
         if_dout => A_4_dout,
         if_empty_n => A_4_empty_n,
-        if_read => play_output_lanes2ou_U0_A_4_V_V_read);
+        if_read => play_output_lanes_U0_A_4_V_V_read);
 
     A_5_U : component fifo_w32_d256_A
     port map (
@@ -1321,7 +1306,7 @@ begin
         if_write => sort_input_lanes_U0_A_5_V_V_write,
         if_dout => A_5_dout,
         if_empty_n => A_5_empty_n,
-        if_read => play_output_lanes2ou_U0_A_5_V_V_read);
+        if_read => play_output_lanes_U0_A_5_V_V_read);
 
     A_6_U : component fifo_w32_d256_A
     port map (
@@ -1334,7 +1319,7 @@ begin
         if_write => sort_input_lanes_U0_A_6_V_V_write,
         if_dout => A_6_dout,
         if_empty_n => A_6_empty_n,
-        if_read => play_output_lanes2ou_U0_A_6_V_V_read);
+        if_read => play_output_lanes_U0_A_6_V_V_read);
 
     A_7_U : component fifo_w32_d256_A
     port map (
@@ -1347,7 +1332,7 @@ begin
         if_write => sort_input_lanes_U0_A_7_V_V_write,
         if_dout => A_7_dout,
         if_empty_n => A_7_empty_n,
-        if_read => play_output_lanes2ou_U0_A_7_V_V_read);
+        if_read => play_output_lanes_U0_A_7_V_V_read);
 
     A_8_U : component fifo_w32_d256_A
     port map (
@@ -1360,7 +1345,7 @@ begin
         if_write => sort_input_lanes_U0_A_8_V_V_write,
         if_dout => A_8_dout,
         if_empty_n => A_8_empty_n,
-        if_read => play_output_lanes2ou_U0_A_8_V_V_read);
+        if_read => play_output_lanes_U0_A_8_V_V_read);
 
     A_9_U : component fifo_w32_d256_A
     port map (
@@ -1373,7 +1358,7 @@ begin
         if_write => sort_input_lanes_U0_A_9_V_V_write,
         if_dout => A_9_dout,
         if_empty_n => A_9_empty_n,
-        if_read => play_output_lanes2ou_U0_A_9_V_V_read);
+        if_read => play_output_lanes_U0_A_9_V_V_read);
 
     A_10_U : component fifo_w32_d256_A
     port map (
@@ -1386,7 +1371,7 @@ begin
         if_write => sort_input_lanes_U0_A_10_V_V_write,
         if_dout => A_10_dout,
         if_empty_n => A_10_empty_n,
-        if_read => play_output_lanes2ou_U0_A_10_V_V_read);
+        if_read => play_output_lanes_U0_A_10_V_V_read);
 
     A_11_U : component fifo_w32_d256_A
     port map (
@@ -1399,7 +1384,7 @@ begin
         if_write => sort_input_lanes_U0_A_11_V_V_write,
         if_dout => A_11_dout,
         if_empty_n => A_11_empty_n,
-        if_read => play_output_lanes2ou_U0_A_11_V_V_read);
+        if_read => play_output_lanes_U0_A_11_V_V_read);
 
     A_12_U : component fifo_w32_d256_A
     port map (
@@ -1412,7 +1397,7 @@ begin
         if_write => sort_input_lanes_U0_A_12_V_V_write,
         if_dout => A_12_dout,
         if_empty_n => A_12_empty_n,
-        if_read => play_output_lanes2ou_U0_A_12_V_V_read);
+        if_read => play_output_lanes_U0_A_12_V_V_read);
 
     A_13_U : component fifo_w32_d256_A
     port map (
@@ -1425,7 +1410,7 @@ begin
         if_write => sort_input_lanes_U0_A_13_V_V_write,
         if_dout => A_13_dout,
         if_empty_n => A_13_empty_n,
-        if_read => play_output_lanes2ou_U0_A_13_V_V_read);
+        if_read => play_output_lanes_U0_A_13_V_V_read);
 
     A_14_U : component fifo_w32_d256_A
     port map (
@@ -1438,7 +1423,7 @@ begin
         if_write => sort_input_lanes_U0_A_14_V_V_write,
         if_dout => A_14_dout,
         if_empty_n => A_14_empty_n,
-        if_read => play_output_lanes2ou_U0_A_14_V_V_read);
+        if_read => play_output_lanes_U0_A_14_V_V_read);
 
     A_15_U : component fifo_w32_d256_A
     port map (
@@ -1451,7 +1436,7 @@ begin
         if_write => sort_input_lanes_U0_A_15_V_V_write,
         if_dout => A_15_dout,
         if_empty_n => A_15_empty_n,
-        if_read => play_output_lanes2ou_U0_A_15_V_V_read);
+        if_read => play_output_lanes_U0_A_15_V_V_read);
 
     B_0_U : component fifo_w32_d256_A
     port map (
@@ -1464,7 +1449,7 @@ begin
         if_write => sort_input_lanes_U0_B_0_V_V_write,
         if_dout => B_0_dout,
         if_empty_n => B_0_empty_n,
-        if_read => play_output_lanes2ou_U0_B_0_V_V_read);
+        if_read => play_output_lanes_U0_B_0_V_V_read);
 
     B_1_U : component fifo_w32_d256_A
     port map (
@@ -1477,7 +1462,7 @@ begin
         if_write => sort_input_lanes_U0_B_1_V_V_write,
         if_dout => B_1_dout,
         if_empty_n => B_1_empty_n,
-        if_read => play_output_lanes2ou_U0_B_1_V_V_read);
+        if_read => play_output_lanes_U0_B_1_V_V_read);
 
     B_2_U : component fifo_w32_d256_A
     port map (
@@ -1490,7 +1475,7 @@ begin
         if_write => sort_input_lanes_U0_B_2_V_V_write,
         if_dout => B_2_dout,
         if_empty_n => B_2_empty_n,
-        if_read => play_output_lanes2ou_U0_B_2_V_V_read);
+        if_read => play_output_lanes_U0_B_2_V_V_read);
 
     B_3_U : component fifo_w32_d256_A
     port map (
@@ -1503,7 +1488,7 @@ begin
         if_write => sort_input_lanes_U0_B_3_V_V_write,
         if_dout => B_3_dout,
         if_empty_n => B_3_empty_n,
-        if_read => play_output_lanes2ou_U0_B_3_V_V_read);
+        if_read => play_output_lanes_U0_B_3_V_V_read);
 
     B_4_U : component fifo_w32_d256_A
     port map (
@@ -1516,7 +1501,7 @@ begin
         if_write => sort_input_lanes_U0_B_4_V_V_write,
         if_dout => B_4_dout,
         if_empty_n => B_4_empty_n,
-        if_read => play_output_lanes2ou_U0_B_4_V_V_read);
+        if_read => play_output_lanes_U0_B_4_V_V_read);
 
     B_5_U : component fifo_w32_d256_A
     port map (
@@ -1529,7 +1514,7 @@ begin
         if_write => sort_input_lanes_U0_B_5_V_V_write,
         if_dout => B_5_dout,
         if_empty_n => B_5_empty_n,
-        if_read => play_output_lanes2ou_U0_B_5_V_V_read);
+        if_read => play_output_lanes_U0_B_5_V_V_read);
 
     B_6_U : component fifo_w32_d256_A
     port map (
@@ -1542,7 +1527,7 @@ begin
         if_write => sort_input_lanes_U0_B_6_V_V_write,
         if_dout => B_6_dout,
         if_empty_n => B_6_empty_n,
-        if_read => play_output_lanes2ou_U0_B_6_V_V_read);
+        if_read => play_output_lanes_U0_B_6_V_V_read);
 
     B_7_U : component fifo_w32_d256_A
     port map (
@@ -1555,7 +1540,7 @@ begin
         if_write => sort_input_lanes_U0_B_7_V_V_write,
         if_dout => B_7_dout,
         if_empty_n => B_7_empty_n,
-        if_read => play_output_lanes2ou_U0_B_7_V_V_read);
+        if_read => play_output_lanes_U0_B_7_V_V_read);
 
     B_8_U : component fifo_w32_d256_A
     port map (
@@ -1568,7 +1553,7 @@ begin
         if_write => sort_input_lanes_U0_B_8_V_V_write,
         if_dout => B_8_dout,
         if_empty_n => B_8_empty_n,
-        if_read => play_output_lanes2ou_U0_B_8_V_V_read);
+        if_read => play_output_lanes_U0_B_8_V_V_read);
 
     B_9_U : component fifo_w32_d256_A
     port map (
@@ -1581,7 +1566,7 @@ begin
         if_write => sort_input_lanes_U0_B_9_V_V_write,
         if_dout => B_9_dout,
         if_empty_n => B_9_empty_n,
-        if_read => play_output_lanes2ou_U0_B_9_V_V_read);
+        if_read => play_output_lanes_U0_B_9_V_V_read);
 
     B_10_U : component fifo_w32_d256_A
     port map (
@@ -1594,7 +1579,7 @@ begin
         if_write => sort_input_lanes_U0_B_10_V_V_write,
         if_dout => B_10_dout,
         if_empty_n => B_10_empty_n,
-        if_read => play_output_lanes2ou_U0_B_10_V_V_read);
+        if_read => play_output_lanes_U0_B_10_V_V_read);
 
     B_11_U : component fifo_w32_d256_A
     port map (
@@ -1607,7 +1592,7 @@ begin
         if_write => sort_input_lanes_U0_B_11_V_V_write,
         if_dout => B_11_dout,
         if_empty_n => B_11_empty_n,
-        if_read => play_output_lanes2ou_U0_B_11_V_V_read);
+        if_read => play_output_lanes_U0_B_11_V_V_read);
 
     B_12_U : component fifo_w32_d256_A
     port map (
@@ -1620,7 +1605,7 @@ begin
         if_write => sort_input_lanes_U0_B_12_V_V_write,
         if_dout => B_12_dout,
         if_empty_n => B_12_empty_n,
-        if_read => play_output_lanes2ou_U0_B_12_V_V_read);
+        if_read => play_output_lanes_U0_B_12_V_V_read);
 
     B_13_U : component fifo_w32_d256_A
     port map (
@@ -1633,7 +1618,7 @@ begin
         if_write => sort_input_lanes_U0_B_13_V_V_write,
         if_dout => B_13_dout,
         if_empty_n => B_13_empty_n,
-        if_read => play_output_lanes2ou_U0_B_13_V_V_read);
+        if_read => play_output_lanes_U0_B_13_V_V_read);
 
     B_14_U : component fifo_w32_d256_A
     port map (
@@ -1646,7 +1631,7 @@ begin
         if_write => sort_input_lanes_U0_B_14_V_V_write,
         if_dout => B_14_dout,
         if_empty_n => B_14_empty_n,
-        if_read => play_output_lanes2ou_U0_B_14_V_V_read);
+        if_read => play_output_lanes_U0_B_14_V_V_read);
 
     B_15_U : component fifo_w32_d256_A
     port map (
@@ -1659,7 +1644,7 @@ begin
         if_write => sort_input_lanes_U0_B_15_V_V_write,
         if_dout => B_15_dout,
         if_empty_n => B_15_empty_n,
-        if_read => play_output_lanes2ou_U0_B_15_V_V_read);
+        if_read => play_output_lanes_U0_B_15_V_V_read);
 
     C_0_U : component fifo_w32_d128_A
     port map (
@@ -1672,7 +1657,7 @@ begin
         if_write => sort_input_lanes_U0_C_0_V_V_write,
         if_dout => C_0_dout,
         if_empty_n => C_0_empty_n,
-        if_read => play_output_lanes2ou_U0_C_0_V_V_read);
+        if_read => play_output_lanes_U0_C_0_V_V_read);
 
     C_1_U : component fifo_w32_d128_A
     port map (
@@ -1685,7 +1670,7 @@ begin
         if_write => sort_input_lanes_U0_C_1_V_V_write,
         if_dout => C_1_dout,
         if_empty_n => C_1_empty_n,
-        if_read => play_output_lanes2ou_U0_C_1_V_V_read);
+        if_read => play_output_lanes_U0_C_1_V_V_read);
 
     C_2_U : component fifo_w32_d128_A
     port map (
@@ -1698,7 +1683,7 @@ begin
         if_write => sort_input_lanes_U0_C_2_V_V_write,
         if_dout => C_2_dout,
         if_empty_n => C_2_empty_n,
-        if_read => play_output_lanes2ou_U0_C_2_V_V_read);
+        if_read => play_output_lanes_U0_C_2_V_V_read);
 
     C_3_U : component fifo_w32_d128_A
     port map (
@@ -1711,7 +1696,7 @@ begin
         if_write => sort_input_lanes_U0_C_3_V_V_write,
         if_dout => C_3_dout,
         if_empty_n => C_3_empty_n,
-        if_read => play_output_lanes2ou_U0_C_3_V_V_read);
+        if_read => play_output_lanes_U0_C_3_V_V_read);
 
     C_4_U : component fifo_w32_d128_A
     port map (
@@ -1724,7 +1709,7 @@ begin
         if_write => sort_input_lanes_U0_C_4_V_V_write,
         if_dout => C_4_dout,
         if_empty_n => C_4_empty_n,
-        if_read => play_output_lanes2ou_U0_C_4_V_V_read);
+        if_read => play_output_lanes_U0_C_4_V_V_read);
 
     C_5_U : component fifo_w32_d128_A
     port map (
@@ -1737,7 +1722,7 @@ begin
         if_write => sort_input_lanes_U0_C_5_V_V_write,
         if_dout => C_5_dout,
         if_empty_n => C_5_empty_n,
-        if_read => play_output_lanes2ou_U0_C_5_V_V_read);
+        if_read => play_output_lanes_U0_C_5_V_V_read);
 
     C_6_U : component fifo_w32_d128_A
     port map (
@@ -1750,7 +1735,7 @@ begin
         if_write => sort_input_lanes_U0_C_6_V_V_write,
         if_dout => C_6_dout,
         if_empty_n => C_6_empty_n,
-        if_read => play_output_lanes2ou_U0_C_6_V_V_read);
+        if_read => play_output_lanes_U0_C_6_V_V_read);
 
     C_7_U : component fifo_w32_d128_A
     port map (
@@ -1763,7 +1748,7 @@ begin
         if_write => sort_input_lanes_U0_C_7_V_V_write,
         if_dout => C_7_dout,
         if_empty_n => C_7_empty_n,
-        if_read => play_output_lanes2ou_U0_C_7_V_V_read);
+        if_read => play_output_lanes_U0_C_7_V_V_read);
 
     C_8_U : component fifo_w32_d128_A
     port map (
@@ -1776,7 +1761,7 @@ begin
         if_write => sort_input_lanes_U0_C_8_V_V_write,
         if_dout => C_8_dout,
         if_empty_n => C_8_empty_n,
-        if_read => play_output_lanes2ou_U0_C_8_V_V_read);
+        if_read => play_output_lanes_U0_C_8_V_V_read);
 
     C_9_U : component fifo_w32_d128_A
     port map (
@@ -1789,7 +1774,7 @@ begin
         if_write => sort_input_lanes_U0_C_9_V_V_write,
         if_dout => C_9_dout,
         if_empty_n => C_9_empty_n,
-        if_read => play_output_lanes2ou_U0_C_9_V_V_read);
+        if_read => play_output_lanes_U0_C_9_V_V_read);
 
     C_10_U : component fifo_w32_d128_A
     port map (
@@ -1802,7 +1787,7 @@ begin
         if_write => sort_input_lanes_U0_C_10_V_V_write,
         if_dout => C_10_dout,
         if_empty_n => C_10_empty_n,
-        if_read => play_output_lanes2ou_U0_C_10_V_V_read);
+        if_read => play_output_lanes_U0_C_10_V_V_read);
 
     C_11_U : component fifo_w32_d128_A
     port map (
@@ -1815,7 +1800,7 @@ begin
         if_write => sort_input_lanes_U0_C_11_V_V_write,
         if_dout => C_11_dout,
         if_empty_n => C_11_empty_n,
-        if_read => play_output_lanes2ou_U0_C_11_V_V_read);
+        if_read => play_output_lanes_U0_C_11_V_V_read);
 
     C_12_U : component fifo_w32_d128_A
     port map (
@@ -1828,7 +1813,7 @@ begin
         if_write => sort_input_lanes_U0_C_12_V_V_write,
         if_dout => C_12_dout,
         if_empty_n => C_12_empty_n,
-        if_read => play_output_lanes2ou_U0_C_12_V_V_read);
+        if_read => play_output_lanes_U0_C_12_V_V_read);
 
     C_13_U : component fifo_w32_d128_A
     port map (
@@ -1841,7 +1826,7 @@ begin
         if_write => sort_input_lanes_U0_C_13_V_V_write,
         if_dout => C_13_dout,
         if_empty_n => C_13_empty_n,
-        if_read => play_output_lanes2ou_U0_C_13_V_V_read);
+        if_read => play_output_lanes_U0_C_13_V_V_read);
 
     C_14_U : component fifo_w32_d128_A
     port map (
@@ -1854,7 +1839,7 @@ begin
         if_write => sort_input_lanes_U0_C_14_V_V_write,
         if_dout => C_14_dout,
         if_empty_n => C_14_empty_n,
-        if_read => play_output_lanes2ou_U0_C_14_V_V_read);
+        if_read => play_output_lanes_U0_C_14_V_V_read);
 
     C_15_U : component fifo_w32_d128_A
     port map (
@@ -1867,7 +1852,7 @@ begin
         if_write => sort_input_lanes_U0_C_15_V_V_write,
         if_dout => C_15_dout,
         if_empty_n => C_15_empty_n,
-        if_read => play_output_lanes2ou_U0_C_15_V_V_read);
+        if_read => play_output_lanes_U0_C_15_V_V_read);
 
     start_for_play_oubkb_U : component start_for_play_oubkb
     port map (
@@ -1875,12 +1860,12 @@ begin
         reset => ap_rst_n_inv,
         if_read_ce => ap_const_logic_1,
         if_write_ce => ap_const_logic_1,
-        if_din => start_for_play_output_lanes2ou_U0_din,
-        if_full_n => start_for_play_output_lanes2ou_U0_full_n,
+        if_din => start_for_play_output_lanes_U0_din,
+        if_full_n => start_for_play_output_lanes_U0_full_n,
         if_write => sort_input_lanes_U0_start_write,
-        if_dout => start_for_play_output_lanes2ou_U0_dout,
-        if_empty_n => start_for_play_output_lanes2ou_U0_empty_n,
-        if_read => play_output_lanes2ou_U0_ap_ready);
+        if_dout => start_for_play_output_lanes_U0_dout,
+        if_empty_n => start_for_play_output_lanes_U0_empty_n,
+        if_read => play_output_lanes_U0_ap_ready);
 
 
 
@@ -1892,9 +1877,6 @@ begin
     end process;
 
     ap_sync_continue <= ap_const_logic_0;
-    i_output_TDATA <= play_output_lanes2ou_U0_i_output_TDATA;
-    i_output_TLAST <= play_output_lanes2ou_U0_i_output_TLAST;
-    i_output_TVALID <= play_output_lanes2ou_U0_i_output_TVALID;
     input_0_TREADY <= sort_input_lanes_U0_input_0_TREADY;
     input_10_TREADY <= sort_input_lanes_U0_input_10_TREADY;
     input_11_TREADY <= sort_input_lanes_U0_input_11_TREADY;
@@ -1911,14 +1893,14 @@ begin
     input_7_TREADY <= sort_input_lanes_U0_input_7_TREADY;
     input_8_TREADY <= sort_input_lanes_U0_input_8_TREADY;
     input_9_TREADY <= sort_input_lanes_U0_input_9_TREADY;
-    play_output_lanes2ou_U0_ap_continue <= ap_const_logic_1;
-    play_output_lanes2ou_U0_ap_start <= start_for_play_output_lanes2ou_U0_empty_n;
-    play_output_lanes2ou_U0_start_full_n <= ap_const_logic_1;
-    play_output_lanes2ou_U0_start_write <= ap_const_logic_0;
-    q_output_TDATA <= play_output_lanes2ou_U0_q_output_TDATA;
-    q_output_TLAST <= play_output_lanes2ou_U0_q_output_TLAST;
-    q_output_TVALID <= play_output_lanes2ou_U0_q_output_TVALID;
+    output_r_TDATA <= play_output_lanes_U0_output_r_TDATA;
+    output_r_TLAST <= play_output_lanes_U0_output_r_TLAST;
+    output_r_TVALID <= play_output_lanes_U0_output_r_TVALID;
+    play_output_lanes_U0_ap_continue <= ap_const_logic_1;
+    play_output_lanes_U0_ap_start <= start_for_play_output_lanes_U0_empty_n;
+    play_output_lanes_U0_start_full_n <= ap_const_logic_1;
+    play_output_lanes_U0_start_write <= ap_const_logic_0;
     sort_input_lanes_U0_ap_continue <= ap_const_logic_1;
     sort_input_lanes_U0_ap_start <= ap_const_logic_1;
-    start_for_play_output_lanes2ou_U0_din <= (0=>ap_const_logic_1, others=>'-');
+    start_for_play_output_lanes_U0_din <= (0=>ap_const_logic_1, others=>'-');
 end behav;
