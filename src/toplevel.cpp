@@ -38,6 +38,12 @@ void play_output_lanes(hls::stream<iq_t> A[N_LANES], hls::stream<iq_t> B[N_LANES
 				 pfbaxisout_t output[N_CHAN_PLANE*2]) {
 //#pragma HLS INTERFACE ap_ctrl_none port=return
 	iq_t temp;
+
+#ifndef __SYNTHESIS__
+	int sizes[3]={0,0,0};
+	bool sizegrow=false;
+#endif
+
 	play_chan: for (int cycle=0; cycle<2*N_CHAN_PLANE; cycle++) {
 #pragma HLS pipeline rewind
 		for (unsigned short lane=0; lane<N_LANES; lane++) {
@@ -47,13 +53,18 @@ void play_output_lanes(hls::stream<iq_t> A[N_LANES], hls::stream<iq_t> B[N_LANES
 			#endif
 			if (cycle < N_CHAN_PLANE) {
 				A[lane].read(temp);
-			} else if (cycle-N_CHAN_PLANE >= N_CHAN_PLANE/2) {
+			} else if (cycle >= 3*N_CHAN_PLANE/2) {
 				B[lane].read(temp);
 			} else {
 				C[lane].read(temp);
 			}
 			#ifndef __SYNTHESIS__
-			//cout<<" Sizes: "<<A[lane].size()<<", "<<B[lane].size()<<", "<<C[lane].size()<<"\n";
+				sizegrow = (A[lane].size()>sizes[0] || B[lane].size()>sizes[1] || B[lane].size()>sizes[2]);
+				sizes[0]=A[lane].size()>sizes[0]? A[lane].size():sizes[0];
+				sizes[1]=B[lane].size()>sizes[1]? B[lane].size():sizes[1];
+				sizes[2]=C[lane].size()>sizes[2]? C[lane].size():sizes[2];
+				if (sizegrow)
+					cout<<" Max Sizes: "<<sizes[0]<<", "<<sizes[1]<<", "<<sizes[2]<<"\n";
 			#endif
 			output[cycle].data[lane]=temp;
 			output[cycle].last=cycle==255 || cycle==511;
