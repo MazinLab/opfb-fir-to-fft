@@ -35,7 +35,7 @@ void sort_input_lanes(pfbaxisin_t input[N_LANES][N_CHAN_PLANE*2],
 }
 
 void play_output_lanes(hls::stream<iq_t> A[N_LANES], hls::stream<iq_t> B[N_LANES], hls::stream<iq_t> C[N_LANES],
-				 pfbaxisin_t output[N_LANES][N_CHAN_PLANE*2]) {
+				 pfbaxisout_t output[N_CHAN_PLANE*2]) {
 //#pragma HLS INTERFACE ap_ctrl_none port=return
 	iq_t temp;
 	play_chan: for (int cycle=0; cycle<2*N_CHAN_PLANE; cycle++) {
@@ -43,26 +43,26 @@ void play_output_lanes(hls::stream<iq_t> A[N_LANES], hls::stream<iq_t> B[N_LANES
 		for (unsigned short lane=0; lane<N_LANES; lane++) {
 #pragma HLS UNROLL
 			#ifndef __SYNTHESIS__
-			cout<<"Cycle "<<cycle<<": Read ";
+			//cout<<"Cycle "<<cycle<<": Read ";
 			#endif
 			if (cycle < N_CHAN_PLANE) {
-				A[lane].read_nb(temp);
+				A[lane].read(temp);
 			} else if (cycle-N_CHAN_PLANE >= N_CHAN_PLANE/2) {
-				B[lane].read_nb(temp);
+				B[lane].read(temp);
 			} else {
-				C[lane].read_nb(temp);
+				C[lane].read(temp);
 			}
 			#ifndef __SYNTHESIS__
-			cout<<" Sizes: "<<A[lane].size()<<", "<<B[lane].size()<<", "<<C[lane].size()<<"\n";
+			//cout<<" Sizes: "<<A[lane].size()<<", "<<B[lane].size()<<", "<<C[lane].size()<<"\n";
 			#endif
-			output[lane][cycle].data=temp;
-			output[lane][cycle].last=cycle==255 || cycle==511;
+			output[cycle].data[lane]=temp;
+			output[cycle].last=cycle==255 || cycle==511;
 		}
 	}
 }
 
 
-void fir_to_fft(pfbaxisin_t input[N_LANES][N_CHAN_PLANE*2], pfbaxisin_t output[N_LANES][N_CHAN_PLANE*2]) {
+void fir_to_fft(pfbaxisin_t input[N_LANES][N_CHAN_PLANE*2], pfbaxisout_t output[N_CHAN_PLANE*2]) {
 //This takes a single PFB lane stream, consisting of 2 sets (one is delayed) of 256 TDM channels,
 // and reorders them, correctly applying the required circular shift.
 // e.g. 1 1z 2 2z 3 3z ... 256 256z becomes 1...256 129z...256z 1z...128z.
@@ -71,10 +71,11 @@ void fir_to_fft(pfbaxisin_t input[N_LANES][N_CHAN_PLANE*2], pfbaxisin_t output[N
 // are replayed in order A C B A C B ... Due to the flip of the B and C replay order B needs to be 256 deep
 // to prevent overwrite.
 #pragma HLS DATAFLOW
+#pragma HLS DATA_PACK variable=output
 #pragma HLS ARRAY_PARTITION variable=input dim=1
-#pragma HLS ARRAY_PARTITION variable=output dim=1
-#pragma HLS INTERFACE axis port=input register=reverse //depth=512
-#pragma HLS INTERFACE axis port=output register=forward //depth=512
+//#pragma HLS ARRAY_PARTITION variable=output dim=1
+#pragma HLS INTERFACE axis port=input register reverse
+#pragma HLS INTERFACE axis port=output register forward
 #pragma HLS INTERFACE ap_ctrl_none port=return
 
 

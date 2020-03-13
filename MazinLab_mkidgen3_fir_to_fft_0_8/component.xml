@@ -3,7 +3,7 @@
   <spirit:vendor>MazinLab</spirit:vendor>
   <spirit:library>mkidgen3</spirit:library>
   <spirit:name>fir_to_fft</spirit:name>
-  <spirit:version>0.6</spirit:version>
+  <spirit:version>0.8</spirit:version>
   <spirit:busInterfaces>
     <spirit:busInterface>
       <spirit:name>input_0</spirit:name>
@@ -986,7 +986,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>e8f8da20</spirit:value>
+            <spirit:value>094e4606</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -1002,7 +1002,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>617d5f3e</spirit:value>
+            <spirit:value>8870e15a</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -1018,7 +1018,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>0b07da8a</spirit:value>
+            <spirit:value>63ac0875</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -1034,7 +1034,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>58b0e9f1</spirit:value>
+            <spirit:value>17b11740</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -1070,7 +1070,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>c1f6695c</spirit:value>
+            <spirit:value>e02ce596</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -2309,7 +2309,7 @@
       <spirit:file>
         <spirit:name>hdl/vhdl/fir_to_fft.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
-        <spirit:userFileType>CHECKSUM_52ad2653</spirit:userFileType>
+        <spirit:userFileType>CHECKSUM_5774131f</spirit:userFileType>
       </spirit:file>
     </spirit:fileSet>
     <spirit:fileSet>
@@ -2374,7 +2374,7 @@
     <spirit:fileSet>
       <spirit:name>xilinx_xpgui_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>xgui/fir_to_fft_v0_6.tcl</spirit:name>
+        <spirit:name>xgui/fir_to_fft_v0_8.tcl</spirit:name>
         <spirit:fileType>tclSource</spirit:fileType>
         <spirit:userFileType>CHECKSUM_1b589c1a</spirit:userFileType>
         <spirit:userFileType>XGUI_VERSION_2</spirit:userFileType>
@@ -2393,7 +2393,7 @@
   <spirit:parameters>
     <spirit:parameter>
       <spirit:name>Component_Name</spirit:name>
-      <spirit:value spirit:resolve="user" spirit:id="PARAM_VALUE.Component_Name" spirit:order="1">fir_to_fft_v0_6</spirit:value>
+      <spirit:value spirit:resolve="user" spirit:id="PARAM_VALUE.Component_Name" spirit:order="1">fir_to_fft_v0_8</spirit:value>
     </spirit:parameter>
     <spirit:parameter>
       <spirit:name>clk_period</spirit:name>
@@ -2426,15 +2426,15 @@
       </xilinx:taxonomies>
       <xilinx:displayName>PFB to FFT Capture</xilinx:displayName>
       <xilinx:definitionSource>HLS</xilinx:definitionSource>
-      <xilinx:coreRevision>2003111544</xilinx:coreRevision>
-      <xilinx:coreCreationDateTime>2020-03-11T22:45:02Z</xilinx:coreCreationDateTime>
+      <xilinx:coreRevision>2003131512</xilinx:coreRevision>
+      <xilinx:coreCreationDateTime>2020-03-13T22:12:45Z</xilinx:coreCreationDateTime>
     </xilinx:coreExtensions>
     <xilinx:packagingInfo>
       <xilinx:xilinxVersion>2019.2.1</xilinx:xilinxVersion>
       <xilinx:checksum xilinx:scope="busInterfaces" xilinx:value="0c746446"/>
-      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="d3488c02"/>
+      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="9fad703c"/>
       <xilinx:checksum xilinx:scope="ports" xilinx:value="778cf930"/>
-      <xilinx:checksum xilinx:scope="parameters" xilinx:value="96994f33"/>
+      <xilinx:checksum xilinx:scope="parameters" xilinx:value="bb967f6e"/>
     </xilinx:packagingInfo>
   </spirit:vendorExtensions>
 </spirit:component>
