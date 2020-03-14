@@ -16,6 +16,10 @@ typedef struct {
 } pfbaxisin_t;
 
 typedef struct {
+	iq_t data[N_LANES];
+} iqgroup_t;
+
+typedef struct {
   iq_t data[N_LANES];
   ap_uint<1> last;
 } pfbaxisout_t;
