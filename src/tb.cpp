@@ -8,26 +8,37 @@ using namespace std;
 //#define __PRINT_PATTERN__
 #define PRINT 1
 
+#define TOTAL_CHAN N_CHAN_PLANE*2
+
 int main(){
 
-	pfbaxisin_t lanein[N_CYCLES][N_LANES][N_CHAN_PLANE*2];
-	pfbaxisout_t laneout[N_CYCLES][N_CHAN_PLANE*2];
+	pfbaxisin_t lanein[N_CYCLES][TOTAL_CHAN][N_LANES];
+	pfbaxisout_t laneout[N_CYCLES*TOTAL_CHAN];
 	bool fail=false;
 
 	//Generate data
 	for (unsigned int i=0; i<N_CYCLES; i++){
-		for (unsigned int j=0; j<N_CHAN_PLANE*2; j++){
+		for (unsigned int j=0; j<TOTAL_CHAN; j++){
 			for (unsigned int k=0; k<N_LANES;k++){
-				lanein[i][k][j].data=i*N_CHAN_PLANE*2+j;
-				lanein[i][k][j].last=j==255||j==511;
+				lanein[i][j][k].data=i*TOTAL_CHAN+j;
+				lanein[i][j][k].last=j==255||j==511;
 			}
 		}
 	}
 
 	//Run the stream input
 	for (int i=0; i<N_CYCLES;i++) { // Go through more than once to see the phase increment
-		fir_to_fft(lanein[i], laneout[i]);
+		for (int j=0; j<TOTAL_CHAN; j++){
+			int outndx=i*TOTAL_CHAN+j-N_CHAN_PLANE;
+			fir_to_fft(lanein[i][j], laneout[outndx <0 ? 0: outndx]);
+		}
 	}
+
+//	for (int i=0; i<N_CYCLES;i++)  // Go through more than once
+//			for (int j=0;j<TOTAL_CHAN;j++) {
+//				if ((i*TOTAL_CHAN+j) % 16 == 0) cout<<endl;
+//				cout<<laneout[i*TOTAL_CHAN+j].data[0]<<",";
+//			}
 
 	//Compare the result
 	int lane=0;
@@ -35,8 +46,8 @@ int main(){
 		cout<<"==========================\n";
 
 	for (int i=0; i<N_CYCLES;i++) { // Go through more than once
-		for (int j=0;j<N_CHAN_PLANE*2;j++) {
-			int cycle=i;
+		for (int j=0;j<TOTAL_CHAN;j++) {
+			if (i==N_CYCLES-1 && j>=N_CHAN_PLANE) break;
 			int inputchan=0;
 			if (j<N_CHAN_PLANE) {
 				inputchan=j*2;
@@ -45,20 +56,20 @@ int main(){
 			} else { //j >=384
 				inputchan=(j-3*N_CHAN_PLANE/2)*2+1; //j*2-3*N_CHAN_PLANE;
 			}
-			unsigned int lanev=laneout[i][j].data[lane].to_uint();
-			unsigned int expected=lanein[i][lane][inputchan].data.to_uint();
+			pfbaxisout_t out = laneout[i*TOTAL_CHAN+j];
+			unsigned int lanev=out.data[lane].to_uint();
+			unsigned int expected=lanein[i][inputchan][lane].data.to_uint();
 			if (PRINT) {
-				//cout<<"Clock Cycle: "<<i*N_CHAN_PLANE*2+j;
-				//cout<<" PNdx: "<<inputchan;
-				cout<<" In: "<<lanein[i][lane][j].data.to_uint()<<" Out: "<<lanev;
-				cout<<" Expected: "<<expected;
-				cout<<" Last: " << laneout[i][j].last<<endl;
+				cout<<"Clock Cycle: "<<i*TOTAL_CHAN+j;
+				cout<<" PNdx: "<<inputchan;
+				cout<<" In: "<<lanein[i][j][lane].data.to_uint()<<" Out: "<<lanev;
+				cout<<" Expected: "<<expected<<" Last: " << out.last<<endl;
 			}
 			if (expected!=lanev) {
 				cout<<"FAIL CHECK\n";
 				fail|=true;
 			}
-			if (!(laneout[i][j].last == (j==255 || j==511))) {
+			if (!(out.last == (j==255 || j==511))) {
 				cout<<"FAIL LAST CHECK\n";
 				fail|=true;
 			}
