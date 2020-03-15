@@ -46,8 +46,8 @@ void fir_to_fft(pfbaxisin_t input[N_LANES], pfbaxisout_t &output) {
 	}
 
 	if (!cycle[0]) A[cycle/2]=groupin;
-	if (cycle[0] && cycle < N_CHAN_PLANE ) B[bwrite][cycle/2]=groupin;
-	if (cycle[0] && cycle >= N_CHAN_PLANE ) C[cycle/2-N_CHAN_PLANE/2]=groupin;
+	if (cycle[0] && cycle <= N_CHAN_PLANE ) B[bwrite][cycle/2]=groupin;
+	if (cycle[0] && cycle > N_CHAN_PLANE ) C[cycle/2-N_CHAN_PLANE/2]=groupin;
 
 	if (primed) {
 		if (cycleout < N_CHAN_PLANE) {
@@ -59,7 +59,7 @@ void fir_to_fft(pfbaxisin_t input[N_LANES], pfbaxisout_t &output) {
 		}
 	}
 
-//	cout<<cycle<<", "<<cycleout<<" P"<<primed<<": "<<groupout[0]<<endl;
+	//cout<<cycle<<", "<<cycleout<<" P"<<primed<<": "<<groupout.data[0]<<endl;
 
 	for (unsigned int lane=0; lane<N_LANES; lane++)
 		output.data[lane]=groupout.data[lane];
