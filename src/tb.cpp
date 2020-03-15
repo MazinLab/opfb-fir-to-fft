@@ -4,7 +4,7 @@
 #include "hls_stream.h"
 using namespace std;
 
-#define N_CYCLES 2
+#define N_CYCLES 4
 //#define __PRINT_PATTERN__
 #define PRINT 1
 
@@ -52,6 +52,8 @@ int main(){
 	for (int i=0; i<N_CYCLES;i++) { // Go through more than once
 		for (int j=0;j<TOTAL_CHAN;j++) {
 			if (i==N_CYCLES-1 && j>=N_CHAN_PLANE) break;
+
+			unsigned int ndx=i*TOTAL_CHAN+j;
 			int inputchan=0;
 			if (j<N_CHAN_PLANE) {
 				inputchan=j*2;
@@ -60,14 +62,15 @@ int main(){
 			} else { //j >=384
 				inputchan=(j-3*N_CHAN_PLANE/2)*2+1; //j*2-3*N_CHAN_PLANE;
 			}
-			pfbaxisout_t out = laneout[i*TOTAL_CHAN+j];
+			pfbaxisout_t out = laneout[ndx];
 			unsigned int lanev=out.data[lane].to_uint();
 			unsigned int expected=lanein[i][inputchan][lane].data.to_uint();
-			if (PRINT) {
-				cout<<"Clock Cycle: "<<i*TOTAL_CHAN+j;
-				cout<<" PNdx: "<<inputchan;
-				cout<<" In: "<<lanein[i][j][lane].data.to_uint()<<" Out: "<<lanev;
-				cout<<" Expected: "<<expected<<" Last: " << out.last<<endl;
+			if (PRINT && ndx%128==0||ndx%128==1||ndx%128==127) {
+
+				cout<<"Cycle "<<setw(4)<<ndx;
+				//cout<<" (PNdx: "<<inputchan<<")";
+				cout<<": In: "<<setw(4)<<lanein[i][j][lane].data.to_uint()<<" Out: "<<setw(4)<<lanev;
+				cout<<" Expected: "<<setw(4)<<expected<<" Last: " << out.last<<endl;
 			}
 			if (expected!=lanev) {
 				cout<<"FAIL CHECK\n";
@@ -77,7 +80,7 @@ int main(){
 				cout<<"FAIL LAST CHECK\n";
 				fail|=true;
 			}
-
+			if(PRINT && ndx%128==1) cout<<endl;
 		}
 	}
 	if (PRINT) cout<<"==========================\n";
