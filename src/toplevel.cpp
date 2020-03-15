@@ -63,7 +63,7 @@ void fir_to_fft(pfbaxisin_t input[N_LANES], pfbaxisout_t &output) {
 
 	for (unsigned int lane=0; lane<N_LANES; lane++)
 		output.data[lane]=groupout.data[lane];
-	output.last=cycleout==255 || cycleout==511;
+	output.last=cycle==255 || cycle==511;
 
 	if (cycle==511) bwrite=!bwrite;
 	if (primed) cycleout++;

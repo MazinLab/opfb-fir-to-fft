@@ -31,6 +31,10 @@ int main(){
 		for (int j=0; j<TOTAL_CHAN; j++){
 			int outndx=i*TOTAL_CHAN+j-N_CHAN_PLANE;
 			fir_to_fft(lanein[i][j], laneout[outndx <0 ? 0: outndx]);
+			if (i==0 && j==N_CHAN_PLANE-1 && !laneout[0].last) {
+				cout<<"TLAST Missing"<<endl;
+				fail=true;
+			}
 		}
 	}
 
