@@ -45,18 +45,24 @@ void fir_to_fft(pfbaxisin_t input[N_LANES], pfbaxisout_t &output) {
 		mismatch[lane]=in.last && cycle!=511;
 	}
 
+	//N_CHAN_PLANE = 256
+	// cycles 0 2 4 6 ... 510, indexes 0-255
 	if (!cycle[0]) A[cycle/2]=groupin;
-	if (cycle[0] && cycle <= N_CHAN_PLANE ) B[bwrite][cycle/2]=groupin;
+	// cycles 1 3 5 ... 255, indexes 0-127
+	if (cycle[0] && cycle < N_CHAN_PLANE ) B[bwrite][cycle/2]=groupin;
+	// cycles 257 259 ... 511, indexes (128-128)-(255-128) = 0-127
 	if (cycle[0] && cycle > N_CHAN_PLANE ) C[cycle/2-N_CHAN_PLANE/2]=groupin;
 
-	if (primed) {
-		if (cycleout < N_CHAN_PLANE) {
-			groupout=A[cycleout];
-		} else if (cycleout < 3*N_CHAN_PLANE/2) {
-			groupout=C[cycleout-N_CHAN_PLANE];
-		} else {
-			groupout=B[!bwrite][cycleout-3*N_CHAN_PLANE/2];
-		}
+
+	if (cycleout < N_CHAN_PLANE) {
+		// 0 ... 255   256 things
+		groupout=A[cycleout];
+	} else if (cycleout < 3*N_CHAN_PLANE/2) {
+		// 256 ... 383    128 things, indexes 0-127
+		groupout=C[cycleout-N_CHAN_PLANE];
+	} else {
+		// 384 ... 511    128 things, indexes 0-127
+		groupout=B[!bwrite][cycleout-3*N_CHAN_PLANE/2];
 	}
 
 	//cout<<cycle<<", "<<cycleout<<" P"<<primed<<": "<<groupout.data[0]<<endl;
@@ -65,8 +71,13 @@ void fir_to_fft(pfbaxisin_t input[N_LANES], pfbaxisout_t &output) {
 		output.data[lane]=groupout.data[lane];
 	output.last=cycle==255 || cycle==511;
 
-	if (cycle==511) bwrite=!bwrite;
+	// cycle:
+	//  0-255 writing A &B, 256-511 writing A&C
+	//  0-255 reading A[0], 256-511 reading A, 0-127 reading C, 128-255 reading B
+	// cycle out:
+	//  0-255 reading A, 256-383 reading C, 384-511 reading B
+	if (cycle==255) bwrite=!bwrite;
 	if (primed) cycleout++;
-	primed|=cycle>=255;
+	primed|=cycle==255;
 	cycle++;
 }
