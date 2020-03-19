@@ -7,12 +7,12 @@ library ieee;
 use ieee.std_logic_1164.all; 
 use ieee.std_logic_unsigned.all;
 
-entity fir_to_fft_A_data_V_ram is 
+entity fir_to_fft_bufferbkb_ram is 
     generic(
             MEM_TYPE    : string := "block"; 
             DWIDTH     : integer := 512; 
-            AWIDTH     : integer := 8; 
-            MEM_SIZE    : integer := 256
+            AWIDTH     : integer := 9; 
+            MEM_SIZE    : integer := 512
     ); 
     port (
           addr0     : in std_logic_vector(AWIDTH-1 downto 0); 
@@ -27,7 +27,7 @@ entity fir_to_fft_A_data_V_ram is
 end entity; 
 
 
-architecture rtl of fir_to_fft_A_data_V_ram is 
+architecture rtl of fir_to_fft_bufferbkb_ram is 
 
 signal addr1_tmp : std_logic_vector(AWIDTH-1 downto 0); 
 type mem_array is array (0 to MEM_SIZE-1) of std_logic_vector (DWIDTH-1 downto 0); 
@@ -92,11 +92,11 @@ end rtl;
 Library IEEE;
 use IEEE.std_logic_1164.all;
 
-entity fir_to_fft_A_data_V is
+entity fir_to_fft_bufferbkb is
     generic (
         DataWidth : INTEGER := 512;
-        AddressRange : INTEGER := 256;
-        AddressWidth : INTEGER := 8);
+        AddressRange : INTEGER := 512;
+        AddressWidth : INTEGER := 9);
     port (
         reset : IN STD_LOGIC;
         clk : IN STD_LOGIC;
@@ -109,8 +109,8 @@ entity fir_to_fft_A_data_V is
         q1 : OUT STD_LOGIC_VECTOR(DataWidth - 1 DOWNTO 0));
 end entity;
 
-architecture arch of fir_to_fft_A_data_V is
-    component fir_to_fft_A_data_V_ram is
+architecture arch of fir_to_fft_bufferbkb is
+    component fir_to_fft_bufferbkb_ram is
         port (
             clk : IN STD_LOGIC;
             addr0 : IN STD_LOGIC_VECTOR;
@@ -125,7 +125,7 @@ architecture arch of fir_to_fft_A_data_V is
 
 
 begin
-    fir_to_fft_A_data_V_ram_U :  component fir_to_fft_A_data_V_ram
+    fir_to_fft_bufferbkb_ram_U :  component fir_to_fft_bufferbkb_ram
     port map (
         clk => clk,
         addr0 => address0,
