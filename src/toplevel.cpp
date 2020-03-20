@@ -81,5 +81,11 @@ void fir_to_fft(pfbaxisin_t input[N_LANES], pfbaxisout_t &output) {
 	//  0-255 reading A, 256-383 reading C, 384-511 reading B
 	if (cycle==511)
 		bwrite=!bwrite;
-	cycle++;
+
+	if (cycle==255&&!primed) {
+		cycle=0;
+		primed=true;
+	} else {
+		cycle++;
+	}
 }

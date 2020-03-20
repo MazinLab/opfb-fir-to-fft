@@ -6,7 +6,7 @@
 #define N_ADC_OUT 8
 #define N_GROUPS 256
 
-typedef ap_uint<32> iq_t;
+typedef ap_int<32> iq_t;
 
 typedef ap_uint<16> sample_t;
 
