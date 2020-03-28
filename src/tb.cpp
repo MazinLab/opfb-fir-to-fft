@@ -20,41 +20,44 @@ int main(){
 	for (unsigned int i=0; i<N_CYCLES; i++){
 		for (unsigned int j=0; j<TOTAL_CHAN; j++){
 			for (unsigned int k=0; k<N_LANES;k++){
-				lanein[i][j][k].data=i*TOTAL_CHAN+j;
+				int cycle=i*TOTAL_CHAN+j;
+				unsigned short ramp;
+				ramp=N_LANES*(cycle-1)/2 + 8*(k%2) + k/2 - 2040*(cycle%2 == 0) + 2048;
+				lanein[i][j][k].data=(j/2)<<16 | ramp;
 				lanein[i][j][k].last=j==255||j==511;
 			}
 		}
 	}
 
 	//Run the stream input
-	for (int i=0; i<N_CYCLES;i++) { // Go through more than once to see the phase increment
+	for (int i=0; i<N_CYCLES;i++) {
 		for (int j=0; j<TOTAL_CHAN; j++){
 			int outndx=i*TOTAL_CHAN+j-N_CHAN_PLANE;
+
 			fir_to_fft(lanein[i][j], laneout[outndx <0 ? 0: outndx]);
-			if (i==0 && j==N_CHAN_PLANE-1 && !laneout[0].last) {
-				cout<<"TLAST Missing"<<endl;
+
+
+			//Check tlast
+			if (outndx>=0 && (j==255 || j==511)&& !laneout[outndx].last) {
+				cout<<"TLAST Missing. "<<i<<","<<j<<endl;
 				fail=true;
 			}
 		}
 	}
 
-//	for (int i=0; i<N_CYCLES;i++)  // Go through more than once
-//			for (int j=0;j<TOTAL_CHAN;j++) {
-//				if ((i*TOTAL_CHAN+j) % 16 == 0) cout<<endl;
-//				cout<<laneout[i*TOTAL_CHAN+j].data[0]<<",";
-//			}
 
 	//Compare the result
 	int lane=0;
 	if (PRINT)
-		cout<<"==========================\n";
+		cout<<"==========================\nBlock 0\n";
 
 	for (int i=0; i<N_CYCLES;i++) { // Go through more than once
 		for (int j=0;j<TOTAL_CHAN;j++) {
 			if (i==N_CYCLES-1 && j>=N_CHAN_PLANE) break;
 
 			unsigned int ndx=i*TOTAL_CHAN+j;
-			int inputchan=0;
+			int inputchan;
+
 			if (j<N_CHAN_PLANE) {
 				inputchan=j*2;
 			} else if (j<3*N_CHAN_PLANE/2) {  //j 256-383
@@ -62,25 +65,44 @@ int main(){
 			} else { //j >=384
 				inputchan=(j-3*N_CHAN_PLANE/2)*2+1; //j*2-3*N_CHAN_PLANE;
 			}
-			pfbaxisout_t out = laneout[ndx];
-			unsigned int lanev=out.data[lane].to_uint();
-			unsigned int expected=lanein[i][inputchan][lane].data.to_uint();
-			if (PRINT && ndx%128==0||ndx%128==1||ndx%128==127) {
+			pfbaxisout_t out;
+			bool print_cycle;
+			unsigned int laneinv, lanev, expected, firin, firout, firexpect;
 
+			out = laneout[ndx];
+			laneinv=lanein[i][j][lane].data.to_uint();
+			lanev=out.data[lane].to_uint();
+			expected=lanein[i][inputchan][lane].data.to_uint();
+
+
+			firin=laneinv>>16;
+			firout=lanev>>16;
+			firexpect=expected>>16;
+			lanev&=0xffff;
+			laneinv&=0xffff;
+			expected&=0xffff;
+			print_cycle = (ndx%128<3) || (ndx%128>125);
+
+
+			if (PRINT && print_cycle) {
 				cout<<"Cycle "<<setw(4)<<ndx;
 				//cout<<" (PNdx: "<<inputchan<<")";
-				cout<<": In: "<<setw(4)<<lanein[i][j][lane].data.to_uint()<<" Out: "<<setw(4)<<lanev;
-				cout<<" Expected: "<<setw(4)<<expected<<" Last: " << out.last<<endl;
+				cout<<": In: "<<setw(5)<<laneinv<<"("<<setw(3)<<firin<<")";
+				cout<<"  Out: "<<setw(5)<<lanev<<"("<<setw(3)<<firout<<")";
+				cout<<" Expected: "<<setw(4)<<expected<<"("<<setw(3)<<firexpect<<")";
+				cout<<" Last: " << out.last;
 			}
 			if (expected!=lanev) {
-				cout<<"FAIL CHECK\n";
+				if (PRINT && print_cycle) cout<<". FAIL MATCH";
 				fail|=true;
 			}
 			if (!(out.last == (j==255 || j==511))) {
-				cout<<"FAIL LAST CHECK\n";
+				if (PRINT && print_cycle) cout<<". FAIL TLAST";
 				fail|=true;
 			}
-			if(PRINT && ndx%128==1) cout<<endl;
+			if (PRINT && print_cycle) cout<<endl;
+			if (PRINT && (ndx+1)%256==0) cout<<"Block "<<(ndx+1)/256<<endl;
+			if (PRINT && ndx%128==2) cout<<"..."<<endl;
 		}
 	}
 	if (PRINT) cout<<"==========================\n";

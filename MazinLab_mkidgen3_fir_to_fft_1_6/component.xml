@@ -3,7 +3,7 @@
   <spirit:vendor>MazinLab</spirit:vendor>
   <spirit:library>mkidgen3</spirit:library>
   <spirit:name>fir_to_fft</spirit:name>
-  <spirit:version>1.3</spirit:version>
+  <spirit:version>1.6</spirit:version>
   <spirit:busInterfaces>
     <spirit:busInterface>
       <spirit:name>ap_clk</spirit:name>
@@ -1070,7 +1070,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>eb396399</spirit:value>
+            <spirit:value>b337cbc9</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -2336,7 +2336,7 @@
     <spirit:fileSet>
       <spirit:name>xilinx_xpgui_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>xgui/fir_to_fft_v1_3.tcl</spirit:name>
+        <spirit:name>xgui/fir_to_fft_v1_6.tcl</spirit:name>
         <spirit:fileType>tclSource</spirit:fileType>
         <spirit:userFileType>CHECKSUM_1b589c1a</spirit:userFileType>
         <spirit:userFileType>XGUI_VERSION_2</spirit:userFileType>
@@ -2355,7 +2355,7 @@
   <spirit:parameters>
     <spirit:parameter>
       <spirit:name>Component_Name</spirit:name>
-      <spirit:value spirit:resolve="user" spirit:id="PARAM_VALUE.Component_Name" spirit:order="1">fir_to_fft_v1_3</spirit:value>
+      <spirit:value spirit:resolve="user" spirit:id="PARAM_VALUE.Component_Name" spirit:order="1">fir_to_fft_v1_6</spirit:value>
     </spirit:parameter>
     <spirit:parameter>
       <spirit:name>clk_period</spirit:name>
@@ -2388,15 +2388,15 @@
       </xilinx:taxonomies>
       <xilinx:displayName>PFB to FFT Capture</xilinx:displayName>
       <xilinx:definitionSource>HLS</xilinx:definitionSource>
-      <xilinx:coreRevision>2003152022</xilinx:coreRevision>
-      <xilinx:coreCreationDateTime>2020-03-16T03:22:50Z</xilinx:coreCreationDateTime>
+      <xilinx:coreRevision>2003271759</xilinx:coreRevision>
+      <xilinx:coreCreationDateTime>2020-03-28T00:59:19Z</xilinx:coreCreationDateTime>
     </xilinx:coreExtensions>
     <xilinx:packagingInfo>
       <xilinx:xilinxVersion>2019.2.1</xilinx:xilinxVersion>
       <xilinx:checksum xilinx:scope="busInterfaces" xilinx:value="3de8bb82"/>
-      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="7141bd7c"/>
+      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="5cdd78ad"/>
       <xilinx:checksum xilinx:scope="ports" xilinx:value="ff55bed7"/>
-      <xilinx:checksum xilinx:scope="parameters" xilinx:value="d0ef48d9"/>
+      <xilinx:checksum xilinx:scope="parameters" xilinx:value="f1f1dfe9"/>
     </xilinx:packagingInfo>
   </spirit:vendorExtensions>
 </spirit:component>
