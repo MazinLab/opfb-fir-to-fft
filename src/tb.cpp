@@ -4,7 +4,7 @@
 #include "hls_stream.h"
 using namespace std;
 
-#define N_CYCLES 4
+#define N_CYCLES 6
 //#define __PRINT_PATTERN__
 #define PRINT 1
 
@@ -22,7 +22,8 @@ int main(){
 			for (unsigned int k=0; k<N_LANES;k++){
 				int cycle=i*TOTAL_CHAN+j;
 				unsigned short ramp;
-				ramp=N_LANES*(cycle-1)/2 + 8*(k%2) + k/2 - 2040*(cycle%2 == 0) + 2048;
+				ramp=N_LANES*(cycle-1)/2 + 8*(k%2) + k/2 - 2040*(cycle%2 == 0);
+				if (i==0 && j%2==0 && j<N_CHAN_PLANE) ramp=0;
 				lanein[i][j][k].data=(j/2)<<16 | ramp;
 				lanein[i][j][k].last=j==255||j==511;
 			}
@@ -32,10 +33,9 @@ int main(){
 	//Run the stream input
 	for (int i=0; i<N_CYCLES;i++) {
 		for (int j=0; j<TOTAL_CHAN; j++){
-			int outndx=i*TOTAL_CHAN+j-N_CHAN_PLANE;
+			int outndx=i*TOTAL_CHAN+j;
 
 			fir_to_fft(lanein[i][j], laneout[outndx <0 ? 0: outndx]);
-
 
 			//Check tlast
 			if (outndx>=0 && (j==255 || j==511)&& !laneout[outndx].last) {
@@ -44,6 +44,7 @@ int main(){
 			}
 		}
 	}
+
 
 
 	//Compare the result
@@ -56,15 +57,12 @@ int main(){
 			if (i==N_CYCLES-1 && j>=N_CHAN_PLANE) break;
 
 			unsigned int ndx=i*TOTAL_CHAN+j;
-			int inputchan;
+			int inputchan, tmp_i, tmp_j, tmp_ndx;
+			bool reorder;
+			tmp_ndx = ndx-768;
+			tmp_i = max(tmp_ndx/512, 0);
+			tmp_j = tmp_ndx-tmp_i*512;
 
-			if (j<N_CHAN_PLANE) {
-				inputchan=j*2;
-			} else if (j<3*N_CHAN_PLANE/2) {  //j 256-383
-				inputchan=(j-N_CHAN_PLANE)*2+N_CHAN_PLANE+1; //1,3,5...
-			} else { //j >=384
-				inputchan=(j-3*N_CHAN_PLANE/2)*2+1; //j*2-3*N_CHAN_PLANE;
-			}
 			pfbaxisout_t out;
 			bool print_cycle;
 			unsigned int laneinv, lanev, expected, firin, firout, firexpect;
@@ -72,8 +70,10 @@ int main(){
 			out = laneout[ndx];
 			laneinv=lanein[i][j][lane].data.to_uint();
 			lanev=out.data[lane].to_uint();
-			expected=lanein[i][inputchan][lane].data.to_uint();
 
+			//This is gross
+			expected=2048+4096*tmp_i+N_LANES*tmp_j + 8*(lane%2) + lane/2 - 4096*(tmp_j>383);
+			expected|=((tmp_ndx+128+128*(j>255))%256)<<16;
 
 			firin=laneinv>>16;
 			firout=lanev>>16;
@@ -83,21 +83,31 @@ int main(){
 			expected&=0xffff;
 			print_cycle = (ndx%128<3) || (ndx%128>125);
 
-
-			if (PRINT && print_cycle) {
-				cout<<"Cycle "<<setw(4)<<ndx;
+#define CSV 1
+			if (PRINT && print_cycle && CSV) {
+				cout<<setw(4)<<ndx;
 				//cout<<" (PNdx: "<<inputchan<<")";
-				cout<<": In: "<<setw(5)<<laneinv<<"("<<setw(3)<<firin<<")";
-				cout<<"  Out: "<<setw(5)<<lanev<<"("<<setw(3)<<firout<<")";
-				cout<<" Expected: "<<setw(4)<<expected<<"("<<setw(3)<<firexpect<<")";
-				cout<<" Last: " << out.last;
+				cout<<","<<setw(5)<<laneinv<<", "<<setw(3)<<firin<<"";
+				cout<<", "<<setw(5)<<lanev<<", "<<setw(3)<<firout<<"";
+				cout<<" ,"<<setw(4)<<expected<<", "<<setw(3)<<firexpect<<"";
+				cout<<" , "<< out.last;
+				cout<<" tndx:"<<tmp_ndx<<","<<tmp_i<<","<<tmp_j;
 			}
-			if (expected!=lanev) {
-				if (PRINT && print_cycle) cout<<". FAIL MATCH";
+//			if (PRINT && print_cycle) {
+//				cout<<"Cycle "<<setw(4)<<ndx;
+//				//cout<<" (PNdx: "<<inputchan<<")";
+//				cout<<": In: "<<setw(5)<<laneinv<<" ("<<setw(3)<<firin<<")";
+//				cout<<"  Out: "<<setw(5)<<lanev<<" ("<<setw(3)<<firout<<")";
+//				cout<<" Expected: "<<setw(4)<<expected<<" ("<<setw(3)<<firexpect<<")";
+//				cout<<" Last: " << out.last;
+//				//cout<<" tndx:"<<tmp_ndx<<","<<tmp_i<<","<<tmp_j;
+//			}
+			if (expected!=lanev && tmp_ndx>=0 ) {
+				if (PRINT && print_cycle) cout<<", FAIL MATCH";
 				fail|=true;
 			}
 			if (!(out.last == (j==255 || j==511))) {
-				if (PRINT && print_cycle) cout<<". FAIL TLAST";
+				if (PRINT && print_cycle) cout<<", FAIL TLAST";
 				fail|=true;
 			}
 			if (PRINT && print_cycle) cout<<endl;

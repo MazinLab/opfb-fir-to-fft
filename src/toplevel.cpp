@@ -18,8 +18,8 @@ void fir_to_fft(pfbaxisin_t input[N_LANES], pfbaxisout_t &output) {
 #pragma HLS DATA_PACK variable=output
 #pragma HLS ARRAY_PARTITION variable=input dim=0
 //#pragma HLS ARRAY_PARTITION variable=output dim=1
-#pragma HLS INTERFACE axis port=input register reverse
-#pragma HLS INTERFACE axis port=output register forward
+#pragma HLS INTERFACE axis off port=input
+#pragma HLS INTERFACE axis off port=output
 #pragma HLS INTERFACE ap_ctrl_none port=return
 
 	static bool primed, bwrite;
