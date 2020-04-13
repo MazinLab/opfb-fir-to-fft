@@ -33,12 +33,12 @@ void fir_to_fft(pfbaxisin_t input[N_LANES], pfbaxisout_t &output) {
 #pragma HLS DATA_PACK variable=output
 #pragma HLS ARRAY_PARTITION variable=input dim=0
 //#pragma HLS ARRAY_PARTITION variable=output dim=1
-#pragma HLS INTERFACE axis port=input register reverse
-#pragma HLS INTERFACE axis port=output register forward
+#pragma HLS INTERFACE axis off port=input
+#pragma HLS INTERFACE axis off port=output
 #pragma HLS INTERFACE ap_ctrl_none port=return
 
 	static bool primed, bwrite;
-	static ap_uint<9> cycle;
+	static ap_uint<9> cycle, cycleout;
 	static iqgroup_t buffer[2][512];
 #pragma HLS DATA_PACK variable=buffer
 #pragma HLS ARRAY_PARTITION variable=buffer complete dim=1
@@ -63,29 +63,25 @@ void fir_to_fft(pfbaxisin_t input[N_LANES], pfbaxisout_t &output) {
 
 	bool firsthalf=(cycle < N_CHAN_PLANE);
 	int ndx=cycle/2+cycle[0]*(256+128*firsthalf-128*!firsthalf);
-	//if (!cycle[0]) cout<<ndx<<", "<<firsthalf<<endl;
+	//cout<<cycle<<", "<<ndx<<", "<<bwrite<<endl;
 	buffer[bwrite][ndx]=groupin;
-	groupout=buffer[!bwrite][cycle];
+	groupout=buffer[!bwrite][cycleout];
 
 
 	//cout<<cycle<<", "<<cycleout<<" P"<<primed<<": "<<groupout.data[0]<<endl;
 
-	for (unsigned int lane=0; lane<N_LANES; lane++)
+	for (unsigned int lane=0; lane<N_LANES; lane++) {
 		output.data[lane]=groupout.data[lane];
-	output.last=cycle==255 || cycle==511;
+		output.last=cycle==255 || cycle==511;
+	}
 
 	// cycle:
 	//  0-255 writing A &B, 256-511 writing A&C
 	//  0-255 reading A[0], 256-511 reading A, 0-127 reading C, 128-255 reading B
 	// cycle out:
 	//  0-255 reading A, 256-383 reading C, 384-511 reading B
-	if (cycle==511)
-		bwrite=!bwrite;
-
-	if (cycle==255&&!primed) {
-		cycle=0;
-		primed=true;
-	} else {
-		cycle++;
-	}
+	if (cycle==511) bwrite=!bwrite;
+	if (primed) cycleout++;
+	primed|=cycle==511;
+	cycle++;
 }
