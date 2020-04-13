@@ -21,7 +21,7 @@ using namespace std;
 		groupout=C[cycleout-N_CHAN_PLANE+128*(cycleout < 3*N_CHAN_PLANE/2)];
 	}
  */
-void fir_to_fft(pfbaxisin_t input[N_LANES], pfbaxisout_t &output) {
+void fir_to_fft(pfbaxisin_t input[N_LANES], pfbaxisin_t output[N_LANES]) {
 //This takes a single PFB lane stream, consisting of 2 sets (one is delayed) of 256 TDM channels,
 // and reorders them, correctly applying the required circular shift.
 // e.g. 1 1z 2 2z 3 3z ... 256 256z becomes 1...256 129z...256z 1z...128z.
@@ -30,9 +30,8 @@ void fir_to_fft(pfbaxisin_t input[N_LANES], pfbaxisout_t &output) {
 // are replayed in order A C B A C B ... Due to the flip of the B and C replay order B needs to be 256 deep
 // to prevent overwrite.
 #pragma HLS PIPELINE II=1
-#pragma HLS DATA_PACK variable=output
 #pragma HLS ARRAY_PARTITION variable=input dim=0
-//#pragma HLS ARRAY_PARTITION variable=output dim=1
+#pragma HLS ARRAY_PARTITION variable=output dim=0
 #pragma HLS INTERFACE axis off port=input
 #pragma HLS INTERFACE axis off port=output
 #pragma HLS INTERFACE ap_ctrl_none port=return
@@ -47,8 +46,6 @@ void fir_to_fft(pfbaxisin_t input[N_LANES], pfbaxisout_t &output) {
 #pragma HLS ARRAY_PARTITION variable=mismatch complete
 
 	iqgroup_t groupin, groupout;
-#pragma HLS DATA_PACK variable=groupin
-#pragma HLS DATA_PACK variable=groupout
 
 	for (unsigned int lane=0; lane<N_LANES; lane++) {
 #pragma HLS UNROLL
@@ -63,23 +60,14 @@ void fir_to_fft(pfbaxisin_t input[N_LANES], pfbaxisout_t &output) {
 
 	bool firsthalf=(cycle < N_CHAN_PLANE);
 	int ndx=cycle/2+cycle[0]*(256+128*firsthalf-128*!firsthalf);
-	//cout<<cycle<<", "<<ndx<<", "<<bwrite<<endl;
 	buffer[bwrite][ndx]=groupin;
 	groupout=buffer[!bwrite][cycleout];
 
-
-	//cout<<cycle<<", "<<cycleout<<" P"<<primed<<": "<<groupout.data[0]<<endl;
-
 	for (unsigned int lane=0; lane<N_LANES; lane++) {
-		output.data[lane]=groupout.data[lane];
-		output.last=cycle==255 || cycle==511;
+		output[lane].data=groupout.data[lane];
+		output[lane].last=cycle==255 || cycle==511;
 	}
 
-	// cycle:
-	//  0-255 writing A &B, 256-511 writing A&C
-	//  0-255 reading A[0], 256-511 reading A, 0-127 reading C, 128-255 reading B
-	// cycle out:
-	//  0-255 reading A, 256-383 reading C, 384-511 reading B
 	if (cycle==511) bwrite=!bwrite;
 	if (primed) cycleout++;
 	primed|=cycle==511;

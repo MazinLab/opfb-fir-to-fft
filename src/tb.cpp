@@ -34,7 +34,13 @@ int main(){
 	for (int i=0; i<N_CYCLES;i++) {
 		for (int j=0; j<TOTAL_CHAN; j++){
 			int outndx=i*TOTAL_CHAN+j;
-			fir_to_fft(lanein[i][j], laneout[outndx <0 ? 0: outndx]);
+			pfbaxisin_t tmp[N_LANES];
+			fir_to_fft(lanein[i][j], tmp);
+
+			for (int k=0;k<N_LANES;k++) {
+				laneout[outndx <0 ? 0: outndx].data[k] = tmp[k].data;
+				laneout[outndx <0 ? 0: outndx].last |= tmp[k].last;
+			}
 
 			//Check tlast
 			if (outndx>=0 && (j==255 || j==511)&& !laneout[outndx].last) {
