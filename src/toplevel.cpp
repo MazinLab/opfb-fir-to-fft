@@ -32,8 +32,8 @@ void fir_to_fft(pfbaxisin_t input[N_LANES], pfbaxisin_t output[N_LANES]) {
 #pragma HLS PIPELINE II=1
 #pragma HLS ARRAY_PARTITION variable=input dim=0
 #pragma HLS ARRAY_PARTITION variable=output dim=0
-#pragma HLS INTERFACE axis register reverse port=input
-#pragma HLS INTERFACE axis off port=output
+#pragma HLS INTERFACE axis register port=input
+#pragma HLS INTERFACE axis register port=output
 #pragma HLS INTERFACE ap_ctrl_none port=return
 
 	static bool primed, bwrite;
