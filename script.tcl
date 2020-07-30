@@ -8,7 +8,7 @@ add_files src/toplevel.hpp
 add_files -tb src/tb.cpp
 
 # Specify the top-level function for synthesis
-set_top fir_to_fftx16
+set_top fir_to_fft
 
 # Create solution1
 open_solution -reset "solution1"
