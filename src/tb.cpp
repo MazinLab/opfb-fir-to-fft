@@ -35,7 +35,16 @@ int main(){
 		for (int j=0; j<TOTAL_CHAN; j++){
 			int outndx=i*TOTAL_CHAN+j;
 			pfbaxisin_t tmp[N_LANES];
-			fir_to_fft(lanein[i][j], tmp);
+			pfbaxisword_t in, out;
+
+			for (int k=0;k<N_LANES;k++)
+				in.data.range(32*(k+1)-1,32*k)=lanein[i][j][k].data;
+			in.last=lanein[i][j][0].last;
+			fir_to_fft(in, out);
+			for (int k=0;k<N_LANES;k++) {
+				tmp[k].data=out.data.range(32*(k+1)-1,32*k);
+				tmp[k].last=out.last;
+			}
 
 			for (int k=0;k<N_LANES;k++) {
 				laneout[outndx <0 ? 0: outndx].data[k] = tmp[k].data;

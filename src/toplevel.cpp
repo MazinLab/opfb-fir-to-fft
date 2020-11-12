@@ -21,7 +21,7 @@ using namespace std;
 		groupout=C[cycleout-N_CHAN_PLANE+128*(cycleout < 3*N_CHAN_PLANE/2)];
 	}
  */
-void fir_to_fft(pfbaxisin_t input[N_LANES], pfbaxisin_t output[N_LANES]) {
+void fir_to_fft(pfbaxisword_t &input, pfbaxisword_t &output) {
 //This takes a single PFB lane stream, consisting of 2 sets (one is delayed) of 256 TDM channels,
 // and reorders them, correctly applying the required circular shift.
 // e.g. 1 1z 2 2z 3 3z ... 256 256z becomes 1...256 129z...256z 1z...128z.
@@ -30,29 +30,20 @@ void fir_to_fft(pfbaxisin_t input[N_LANES], pfbaxisin_t output[N_LANES]) {
 // are replayed in order A C B A C B ... Due to the flip of the B and C replay order B needs to be 256 deep
 // to prevent overwrite.
 #pragma HLS PIPELINE II=1
-#pragma HLS ARRAY_PARTITION variable=input dim=0
-#pragma HLS ARRAY_PARTITION variable=output dim=0
 #pragma HLS INTERFACE axis register port=input
 #pragma HLS INTERFACE axis register port=output
 #pragma HLS INTERFACE ap_ctrl_none port=return
 
 	static bool primed, bwrite;
 	static ap_uint<9> cycle, cycleout;
-	static iqgroup_t buffer[2][512];
-#pragma HLS DATA_PACK variable=buffer
+	static iqword_t buffer[2][512];
 #pragma HLS ARRAY_PARTITION variable=buffer complete dim=1
 
-	bool mismatch[N_LANES];
-#pragma HLS ARRAY_PARTITION variable=mismatch complete
-
-	iqgroup_t groupin, groupout;
+	iqword_t groupin=0, groupout=0;
 
 	for (unsigned int lane=0; lane<N_LANES; lane++) {
 #pragma HLS UNROLL
-		pfbaxisin_t in;
-		in=input[lane];
-		groupin.data[lane]=input[lane].data;
-		mismatch[lane]=in.last && cycle!=511;
+		groupin.range(32*(lane+1)-1, lane*32)=input.data;
 	}
 
 	//N_CHAN_PLANE = 256
@@ -63,10 +54,8 @@ void fir_to_fft(pfbaxisin_t input[N_LANES], pfbaxisin_t output[N_LANES]) {
 	buffer[bwrite][ndx]=groupin;
 	groupout=buffer[!bwrite][cycleout];
 
-	for (unsigned int lane=0; lane<N_LANES; lane++) {
-		output[lane].data=groupout.data[lane];
-		output[lane].last=cycle==255 || cycle==511;
-	}
+	output.data=groupout;
+	output.last=cycle==255 || cycle==511;
 
 	if (cycle==511) bwrite=!bwrite;
 	if (primed) cycleout++;
