@@ -41,10 +41,7 @@ void fir_to_fft(pfbaxisword_t &input, pfbaxisword_t &output) {
 
 	iqword_t groupin=0, groupout=0;
 
-	for (unsigned int lane=0; lane<N_LANES; lane++) {
-#pragma HLS UNROLL
-		groupin.range(32*(lane+1)-1, lane*32)=input.data;
-	}
+	groupin=input.data;
 
 	//N_CHAN_PLANE = 256
 	// cycles 0 2 4 6 ... 510, indexes 0-255

@@ -63,7 +63,7 @@ int main(){
 
 	//Compare the result
 	//We want to see 0-255 -128-0
-	int lane=0;
+	int lane=15;
 	if (PRINT)
 		cout<<"==========================\nBlock 0\n";
 
