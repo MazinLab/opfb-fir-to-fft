@@ -31,16 +31,20 @@ int main(){
 	}
 
 	//Run the stream input
+	hls::stream<opfbaxis_t> instream, outstream;
 	for (int i=0; i<N_CYCLES;i++) {
 		for (int j=0; j<TOTAL_CHAN; j++){
 			int outndx=i*TOTAL_CHAN+j;
 			pfbaxisin_t tmp[N_LANES];
-			pfbaxisword_t in, out;
+			opfbaxis_t in, out;
 
 			for (int k=0;k<N_LANES;k++)
 				in.data.range(32*(k+1)-1,32*k)=lanein[i][j][k].data;
 			in.last=lanein[i][j][0].last;
-			fir_to_fft(in, out);
+
+			instream.write(in);
+			fir_to_fft(instream, outstream);
+			out=outstream.read();
 			for (int k=0;k<N_LANES;k++) {
 				tmp[k].data=out.data.range(32*(k+1)-1,32*k);
 				tmp[k].last=out.last;
