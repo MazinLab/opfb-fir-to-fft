@@ -1,9 +1,8 @@
 #include "datatypes.hpp"
 #include "ap_shift_reg.h"
 #include "hls_stream.h"
-#include "axi.h"
 #include "ap_int.h"
-
+#include "ap_axi_sdata.h"
 #define N_CHAN_PLANE 256
 #define N_LANES 16
 #define N_ADC_OUT 8
